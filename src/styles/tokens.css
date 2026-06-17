@@ -1,0 +1,47 @@
+/* 디자인 토큰 — 색/타이포/간격/모션. 테마는 :root[data-theme] 로 전환. */
+:root {
+  /* 색 (ivory 기본) */
+  --c-bg: #faf7f2;
+  --c-surface: #ffffff;
+  --c-ink: #2c2722;
+  --c-ink-soft: #6f675e;
+  --c-line: #e8e1d6;
+  --c-accent: #b08d6a;     /* 뮤트 골드/브라운 */
+  --c-accent-soft: #d9c4ab;
+
+  /* 타이포 */
+  --font-serif-ko: 'Nanum Myeongjo', serif;        /* 한글 명조 (제목/이름) */
+  --font-serif-en: 'Cormorant Garamond', serif;    /* 라틴 세리프 (날짜 히어로) */
+  --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+
+  --fs-hero: clamp(2.4rem, 12vw, 3.6rem);
+  --fs-title: 1.35rem;
+  --fs-body: 1rem;
+  --fs-small: 0.85rem;
+  --lh-body: 1.9;
+
+  /* 레이아웃 */
+  --w-phone: 26.875rem;     /* 430px */
+  --pad-x: 1.5rem;
+  --section-y: 4.5rem;
+  --radius: 14px;
+
+  /* 모션 */
+  --reveal-dist: 24px;
+  --reveal-dur: 0.7s;
+  --reveal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root[data-theme='sage'] {
+  --c-bg: #f3f5f0;
+  --c-accent: #7c8b6f;
+  --c-accent-soft: #c2cdb6;
+  --c-line: #e0e5da;
+}
+
+:root[data-theme='blush'] {
+  --c-bg: #fbf3f3;
+  --c-accent: #c08a8a;
+  --c-accent-soft: #e6c9c9;
+  --c-line: #efdede;
+}

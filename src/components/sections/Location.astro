@@ -1,0 +1,54 @@
+---
+import Section from '@/components/ui/Section.astro';
+import Accordion from '@/components/ui/Accordion.astro';
+import CopyButton from '@/components/ui/CopyButton.astro';
+import DeepLinkButton from '@/components/ui/DeepLinkButton.astro';
+import config from '@/lib/config';
+
+const { location: loc } = config;
+const { directions } = loc;
+---
+
+<Section id="location" label="Location" title="오시는 길">
+  <div class="loc__head center">
+    <p class="loc__venue">{loc.venueName}</p>
+    {loc.hallFloor && <p class="muted">{loc.hallFloor}</p>}
+    <p class="loc__addr">{loc.address}</p>
+    <CopyButton text={loc.address} label="주소 복사" toast="주소가 복사되었습니다" />
+  </div>
+
+  <!-- 가벼운 정적 지도(카톡 웹뷰 안전). 실제 지도는 길찾기 버튼으로. -->
+  <img class="loc__map" src={loc.staticMapImage} alt={`${loc.venueName} 위치 지도`} loading="lazy" width="800" height="500" />
+
+  <div class="loc__links">
+    {directions.naverMapUrl && <DeepLinkButton href={directions.naverMapUrl} label="네이버지도" />}
+    {directions.kakaoMapUrl && <DeepLinkButton href={directions.kakaoMapUrl} label="카카오맵" />}
+    {directions.tmapUrl && <DeepLinkButton href={directions.tmapUrl} label="T맵" />}
+  </div>
+
+  <div class="loc__how">
+    {loc.byCar && <Accordion summary="🚗 자가용 / 주차">{loc.byCar}</Accordion>}
+    {loc.byTransit && <Accordion summary="🚇 대중교통">{loc.byTransit}</Accordion>}
+    {loc.byShuttle && <Accordion summary="🚌 셔틀버스">{loc.byShuttle}</Accordion>}
+  </div>
+</Section>
+
+<style>
+  .loc__head { margin-bottom: 1.2rem; }
+  .loc__venue { font-family: var(--font-serif-ko); font-size: 1.15rem; margin: 0 0 0.2rem; }
+  .loc__addr { font-size: 0.92rem; margin: 0.6rem 0 0.8rem; color: var(--c-ink); }
+  .loc__map {
+    width: 100%;
+    border-radius: var(--radius);
+    border: 1px solid var(--c-line);
+    margin-bottom: 1rem;
+  }
+  .loc__links {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1.6rem;
+    flex-wrap: wrap;
+  }
+  .loc__how { margin-top: 0.5rem; }
+</style>

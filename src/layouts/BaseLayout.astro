@@ -1,0 +1,40 @@
+---
+import '@/styles/global.css';
+import config from '@/lib/config';
+
+const { share, meta, cover } = config;
+const pageTitle = share.ogTitle;
+// 프로젝트 repo 배포 시 '/<repo>'. trailing slash 유무에 무관하게 정규화.
+const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
+---
+
+<!doctype html>
+<html lang="ko" data-theme={meta.theme ?? 'ivory'}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={share.ogDescription} />
+    <link rel="icon" href={faviconHref} type="image/svg+xml" />
+
+    <!-- 카톡/링크 공유용 Open Graph (절대 https URL 필수) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={share.ogTitle} />
+    <meta property="og:description" content={share.ogDescription} />
+    <meta property="og:image" content={share.ogImage} />
+    <meta property="og:url" content={share.siteUrl} />
+    <meta property="og:locale" content="ko_KR" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={share.ogTitle} />
+    <meta name="twitter:description" content={share.ogDescription} />
+    <meta name="twitter:image" content={share.ogImage} />
+
+    <!-- 히어로는 성역(LCP): 미리 불러옵니다 -->
+    <link rel="preload" as="image" href={cover.heroImage} fetchpriority="high" />
+  </head>
+  <body>
+    <main class="phone">
+      <slot />
+    </main>
+  </body>
+</html>

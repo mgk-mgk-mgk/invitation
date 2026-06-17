@@ -1,0 +1,13 @@
+---
+/** 지도 길찾기 등 외부 딥링크 버튼. */
+interface Props {
+  href: string;
+  label: string;
+  class?: string;
+}
+const { href, label, class: cls = '' } = Astro.props;
+---
+
+<a href={href} target="_blank" rel="noopener noreferrer" class:list={['btn', cls]}>
+  {label}
+</a>

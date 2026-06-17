@@ -1,0 +1,11 @@
+---
+import Section from '@/components/ui/Section.astro';
+import config from '@/lib/config';
+import Guestbook from '@/components/islands/Guestbook.tsx';
+
+const { guestbook } = config;
+---
+
+<Section id="guestbook" label="Guestbook" title="축하 메시지">
+  <Guestbook client:visible allowPassword={guestbook.allowPassword} />
+</Section>

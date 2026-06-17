@@ -1,0 +1,63 @@
+---
+import Section from '@/components/ui/Section.astro';
+import config from '@/lib/config';
+import type { FamilySide } from '@/types/wedding';
+
+const { greeting } = config;
+
+/** "父 ○○○ · 母 ○○○ 의 장남 ○○○" 계보 줄. 故/생략 처리 포함. */
+function lineage(side: FamilySide): string {
+  const parts: string[] = [];
+  for (const p of [side.father, side.mother]) {
+    if (!p) continue;
+    if (p.deceased && p.hideIfDeceased) continue;
+    parts.push(p.deceased ? `故 ${p.name}` : p.name);
+  }
+  const parents = parts.join(' · ');
+  const order = side.person.birthOrder ? ` 의 ${side.person.birthOrder}` : ' 의';
+  return parents ? `${parents}${order} ${side.person.name}` : side.person.name;
+}
+
+const groomLine = lineage(greeting.groom);
+const brideLine = lineage(greeting.bride);
+---
+
+<Section id="greeting" label="Invitation" title="모시는 글" divider={false}>
+  <p class="greeting__msg center">{greeting.message}</p>
+
+  <div class="greeting__families">
+    <p class="greeting__line"><span class="greeting__side">신랑</span>{groomLine}</p>
+    <p class="greeting__line"><span class="greeting__side">신부</span>{brideLine}</p>
+  </div>
+</Section>
+
+<style>
+  .greeting__msg {
+    white-space: pre-line;
+    font-size: 1.02rem;
+    color: var(--c-ink);
+    margin: 0 0 2.5rem;
+  }
+  .greeting__families {
+    border-top: 1px solid var(--c-line);
+    border-bottom: 1px solid var(--c-line);
+    padding: 1.4rem 0;
+    display: grid;
+    gap: 0.7rem;
+    text-align: center;
+  }
+  .greeting__line {
+    margin: 0;
+    font-family: var(--font-serif-ko);
+    font-size: 1rem;
+    color: var(--c-ink);
+  }
+  .greeting__side {
+    display: inline-block;
+    min-width: 2.6rem;
+    color: var(--c-accent);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+  }
+</style>

@@ -1,0 +1,60 @@
+---
+import Section from '@/components/ui/Section.astro';
+import config from '@/lib/config';
+
+const { coupleStory, cover } = config;
+---
+
+<Section id="story" label="Our Story" title="우리의 이야기">
+  {(coupleStory.groomProfile || coupleStory.brideProfile) && (
+    <div class="story__profiles">
+      {coupleStory.groomProfile && (
+        <div class="story__p">
+          <p class="story__name">신랑 {cover.groomName}</p>
+          <p class="muted">{coupleStory.groomProfile}</p>
+        </div>
+      )}
+      {coupleStory.brideProfile && (
+        <div class="story__p">
+          <p class="story__name">신부 {cover.brideName}</p>
+          <p class="muted">{coupleStory.brideProfile}</p>
+        </div>
+      )}
+    </div>
+  )}
+
+  {coupleStory.timeline && coupleStory.timeline.length > 0 && (
+    <ol class="tl">
+      {coupleStory.timeline.map((t) => (
+        <li class="tl__item">
+          <span class="tl__dot" aria-hidden="true"></span>
+          <div>
+            <p class="tl__date">{t.date}</p>
+            <p class="tl__title">{t.title}</p>
+            {t.body && <p class="muted tl__body">{t.body}</p>}
+          </div>
+        </li>
+      ))}
+    </ol>
+  )}
+</Section>
+
+<style>
+  .story__profiles { display: grid; gap: 1.2rem; margin-bottom: 2rem; text-align: center; }
+  .story__name { font-family: var(--font-serif-ko); font-size: 1.05rem; margin: 0 0 0.3rem; }
+  .tl { list-style: none; margin: 0; padding: 0 0 0 0.5rem; }
+  .tl__item { display: flex; gap: 1rem; padding-bottom: 1.4rem; position: relative; }
+  .tl__item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 5px; top: 14px; bottom: 0;
+    width: 1px; background: var(--c-accent-soft);
+  }
+  .tl__dot {
+    width: 11px; height: 11px; border-radius: 999px;
+    background: var(--c-accent); margin-top: 5px; flex-shrink: 0; z-index: 1;
+  }
+  .tl__date { margin: 0; font-family: var(--font-serif-en); color: var(--c-accent); font-size: 0.85rem; }
+  .tl__title { margin: 0.1rem 0 0; font-size: 1rem; }
+  .tl__body { font-size: 0.85rem; margin: 0.2rem 0 0; }
+</style>

@@ -1,0 +1,51 @@
+---
+import Section from '@/components/ui/Section.astro';
+import config from '@/lib/config';
+import Lightbox from '@/components/islands/Lightbox.tsx';
+
+const { gallery } = config;
+---
+
+<Section id="gallery" label="Gallery" title="우리의 순간">
+  <div class:list={['grid', gallery.layout === 'carousel' && 'grid--scroll']}>
+    {gallery.images.map((img, i) => (
+      <button type="button" class="grid__item" data-gallery-item data-index={i} aria-label={`사진 ${i + 1} 크게 보기`}>
+        <img src={img.src} alt={img.alt} loading="lazy" decoding="async" width="400" height="400" />
+      </button>
+    ))}
+  </div>
+
+  <!-- 풀스크린 뷰어(섬) — 썸네일은 정적, 오버레이만 hydrate -->
+  <Lightbox client:visible images={gallery.images} />
+</Section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .grid--scroll {
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: 70%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .grid--scroll .grid__item { scroll-snap-align: center; }
+  .grid__item {
+    padding: 0;
+    border: none;
+    background: var(--c-line);
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    cursor: pointer;
+  }
+  .grid__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>

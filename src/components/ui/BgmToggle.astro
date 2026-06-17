@@ -1,0 +1,65 @@
+---
+/** 떠 있는 배경음악 토글. 기본 OFF(iOS 자동재생 차단) — 탭하면 재생. */
+interface Props {
+  src: string;
+}
+const { src } = Astro.props;
+---
+
+<button id="bgm-toggle" class="bgm" type="button" aria-pressed="false" aria-label="배경음악 켜기">
+  <span class="bgm__icon" data-state="off" aria-hidden="true">♪</span>
+</button>
+<audio id="bgm-audio" src={src} loop preload="none"></audio>
+
+<style>
+  .bgm {
+    position: fixed;
+    top: calc(0.9rem + env(safe-area-inset-top));
+    right: 0.9rem;
+    z-index: 50;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: 1px solid var(--c-line);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    color: var(--c-accent);
+  }
+  .bgm__icon[data-state='on'] {
+    animation: spin 4s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bgm__icon { animation: none !important; }
+  }
+</style>
+
+<script>
+  const btn = document.getElementById('bgm-toggle') as HTMLButtonElement | null;
+  const audio = document.getElementById('bgm-audio') as HTMLAudioElement | null;
+  const icon = btn?.querySelector<HTMLElement>('.bgm__icon');
+  if (btn && audio) {
+    btn.addEventListener('click', async () => {
+      if (audio.paused) {
+        try {
+          await audio.play();
+          btn.setAttribute('aria-pressed', 'true');
+          btn.setAttribute('aria-label', '배경음악 끄기');
+          if (icon) icon.dataset.state = 'on';
+        } catch {
+          /* 재생 차단 시 무시 */
+        }
+      } else {
+        audio.pause();
+        btn.setAttribute('aria-pressed', 'false');
+        btn.setAttribute('aria-label', '배경음악 켜기');
+        if (icon) icon.dataset.state = 'off';
+      }
+    });
+  }
+</script>

@@ -1,0 +1,17 @@
+# build output
+dist/
+.astro/
+
+# deps
+node_modules/
+
+# env (절대 커밋 금지)
+.env
+.env.production
+.env.*.local
+
+# macOS
+.DS_Store
+
+# logs
+npm-debug.log*

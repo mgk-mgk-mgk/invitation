@@ -1,0 +1,18 @@
+---
+/** 섹션 래퍼: 앵커 id + 영문 라벨 + 한글 제목 + 스크롤 reveal. */
+interface Props {
+  id?: string;
+  label?: string; // 영문 소제목 (예: INVITATION)
+  title?: string; // 한글 제목 (예: 모시는 글)
+  divider?: boolean;
+  class?: string;
+}
+const { id, label, title, divider = true, class: cls = '' } = Astro.props;
+---
+
+{divider && <div class="divider" aria-hidden="true"></div>}
+<section id={id} class:list={['section', 'reveal', cls]}>
+  {label && <p class="section__label">{label}</p>}
+  {title && <h2 class="section__title">{title}</h2>}
+  <slot />
+</section>

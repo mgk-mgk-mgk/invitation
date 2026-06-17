@@ -1,0 +1,120 @@
+---
+import Section from '@/components/ui/Section.astro';
+import config from '@/lib/config';
+import { monthGrid, dateKoFull, dayOfWeekEn } from '@/lib/datetime';
+import { buildICS, googleCalendarUrl } from '@/lib/ics';
+
+const { cover, calendar, location } = config;
+const g = monthGrid(cover.datetimeISO);
+const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+
+// 달력 셀 배열(앞쪽 빈칸 + 날짜)
+const cells: (number | null)[] = [
+  ...Array.from({ length: g.firstDow }, () => null),
+  ...Array.from({ length: g.daysInMonth }, (_, i) => i + 1),
+];
+
+const title = `${cover.groomName} ♥ ${cover.brideName} 결혼식`;
+const ics = buildICS({
+  title,
+  startIso: cover.datetimeISO,
+  durationMinutes: 90,
+  location: `${location.venueName} ${location.hallFloor ?? ''}`.trim(),
+  description: dateKoFull(cover.datetimeISO),
+});
+const icsHref = `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
+const gcalHref = googleCalendarUrl({
+  title,
+  startIso: cover.datetimeISO,
+  durationMinutes: 90,
+  location: `${location.venueName} ${location.hallFloor ?? ''}`.trim(),
+});
+const weddingDayDow = dayOfWeekEn(cover.datetimeISO);
+---
+
+<Section id="calendar" label="The Date" title="예식 안내">
+  <p class="cal__full center">{dateKoFull(cover.datetimeISO)}</p>
+
+  <table class="cal" role="presentation">
+    <thead>
+      <tr>{weekdays.map((w, i) => <th class:list={[i === 0 && 'cal--sun']}>{w}</th>)}</tr>
+    </thead>
+    <tbody>
+      {Array.from({ length: Math.ceil(cells.length / 7) }, (_, row) => (
+        <tr>
+          {cells.slice(row * 7, row * 7 + 7).map((d, col) => (
+            <td class:list={[d === g.weddingDay && 'cal__wed', col === 0 && d && 'cal--sun']}>
+              {d ? <span>{d}</span> : ''}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  {calendar.showCountdown && (
+    <p class="cal__countdown" data-target={cover.datetimeISO}>
+      <span id="dday-label">D-DAY</span>
+      <span class="muted"> · {weddingDayDow}</span>
+    </p>
+  )}
+
+  {calendar.addToCalendar && (
+    <div class="cal__actions">
+      <a class="btn" href={icsHref} download="wedding.ics">캘린더에 추가 (.ics)</a>
+      <a class="btn" href={gcalHref} target="_blank" rel="noopener noreferrer">구글 캘린더</a>
+    </div>
+  )}
+</Section>
+
+<style>
+  .cal__full { font-family: var(--font-serif-ko); font-size: 1.05rem; margin: 0 0 1.5rem; }
+  .cal {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    max-width: 19rem;
+    margin: 0 auto 1.5rem;
+  }
+  .cal th {
+    font-size: 0.75rem;
+    color: var(--c-ink-soft);
+    font-weight: 500;
+    padding-bottom: 0.6rem;
+  }
+  .cal td {
+    height: 2.4rem;
+    font-size: 0.9rem;
+    color: var(--c-ink);
+  }
+  .cal--sun { color: #c0716b; }
+  .cal__wed span {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    background: var(--c-accent);
+    color: #fff;
+    font-weight: 700;
+  }
+  .cal__countdown {
+    text-align: center;
+    font-family: var(--font-serif-en);
+    font-size: 1.3rem;
+    letter-spacing: 0.08em;
+    color: var(--c-accent);
+    margin: 0 0 1.5rem;
+  }
+  .cal__actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+</style>
+
+<script>
+  import { dDayLabel } from '@/lib/datetime';
+  const el = document.querySelector<HTMLElement>('.cal__countdown');
+  const label = document.getElementById('dday-label');
+  if (el && label) {
+    const target = el.dataset.target;
+    if (target) label.textContent = dDayLabel(target);
+  }
+</script>

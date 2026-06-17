@@ -1,0 +1,24 @@
+---
+import Section from '@/components/ui/Section.astro';
+import config from '@/lib/config';
+import RsvpForm from '@/components/islands/RsvpForm.tsx';
+
+const { rsvp } = config;
+---
+
+<Section id="rsvp" label="RSVP" title="참석 여부">
+  <p class="center muted rsvp__intro">
+    축하의 마음으로 함께해 주실 분들을 위해<br />참석 여부를 미리 알려주시면 감사하겠습니다.
+  </p>
+  <RsvpForm
+    client:visible
+    askSide={rsvp.askSide}
+    askHeadcount={rsvp.askHeadcount}
+    askMeal={rsvp.askMeal}
+    deadlineISO={rsvp.deadlineISO}
+  />
+</Section>
+
+<style>
+  .rsvp__intro { font-size: 0.9rem; margin: 0 0 1.5rem; }
+</style>

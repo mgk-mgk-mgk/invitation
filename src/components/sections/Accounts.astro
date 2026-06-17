@@ -1,0 +1,68 @@
+---
+import Section from '@/components/ui/Section.astro';
+import Accordion from '@/components/ui/Accordion.astro';
+import CopyButton from '@/components/ui/CopyButton.astro';
+import config from '@/lib/config';
+
+const { accounts } = config;
+const groom = accounts.list.filter((a) => a.side === 'groom');
+const bride = accounts.list.filter((a) => a.side === 'bride');
+---
+
+<Section id="accounts" label="Gift" title={accounts.heading}>
+  {accounts.reassuranceNote && (
+    <p class="acc-note center muted">{accounts.reassuranceNote}</p>
+  )}
+
+  <div class="acc-groups">
+    {groom.length > 0 && (
+      <Accordion summary="신랑측 계좌번호">
+        {groom.map((a) => (
+          <div class="acc-row">
+            <div>
+              <p class="acc-holder">{a.holderLabel}</p>
+              <p class="acc-num">{a.bank} {a.number}</p>
+            </div>
+            <div class="acc-btns">
+              <CopyButton text={a.number} label="복사" toast="계좌번호가 복사되었습니다" />
+              {a.kakaoPayUrl && <a class="btn btn--accent" href={a.kakaoPayUrl} target="_blank" rel="noopener noreferrer">카카오페이</a>}
+            </div>
+          </div>
+        ))}
+      </Accordion>
+    )}
+
+    {bride.length > 0 && (
+      <Accordion summary="신부측 계좌번호">
+        {bride.map((a) => (
+          <div class="acc-row">
+            <div>
+              <p class="acc-holder">{a.holderLabel}</p>
+              <p class="acc-num">{a.bank} {a.number}</p>
+            </div>
+            <div class="acc-btns">
+              <CopyButton text={a.number} label="복사" toast="계좌번호가 복사되었습니다" />
+              {a.kakaoPayUrl && <a class="btn btn--accent" href={a.kakaoPayUrl} target="_blank" rel="noopener noreferrer">카카오페이</a>}
+            </div>
+          </div>
+        ))}
+      </Accordion>
+    )}
+  </div>
+</Section>
+
+<style>
+  .acc-note { white-space: pre-line; font-size: 0.88rem; margin: 0 0 1.5rem; }
+  .acc-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px dashed var(--c-line);
+  }
+  .acc-row:last-child { border-bottom: none; }
+  .acc-holder { margin: 0; font-size: 0.9rem; color: var(--c-ink); }
+  .acc-num { margin: 0.1rem 0 0; font-size: 0.82rem; color: var(--c-ink-soft); }
+  .acc-btns { display: flex; gap: 0.35rem; flex-shrink: 0; }
+</style>

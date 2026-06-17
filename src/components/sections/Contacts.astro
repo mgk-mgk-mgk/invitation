@@ -1,0 +1,67 @@
+---
+import Section from '@/components/ui/Section.astro';
+import config from '@/lib/config';
+import type { FamilySide } from '@/types/wedding';
+
+const { greeting } = config;
+
+interface Row {
+  role: string;
+  name: string;
+  phone?: string;
+}
+
+function rows(side: FamilySide, sideLabel: string): Row[] {
+  const out: Row[] = [{ role: sideLabel, name: side.person.name, phone: side.person.phone }];
+  if (side.father && !(side.father.deceased && side.father.hideIfDeceased)) {
+    out.push({ role: `${sideLabel} 아버지`, name: side.father.name, phone: side.father.phone });
+  }
+  if (side.mother && !(side.mother.deceased && side.mother.hideIfDeceased)) {
+    out.push({ role: `${sideLabel} 어머니`, name: side.mother.name, phone: side.mother.phone });
+  }
+  return out;
+}
+
+const groomRows = rows(greeting.groom, '신랑');
+const brideRows = rows(greeting.bride, '신부');
+---
+
+<Section id="contacts" label="Contact" title="연락하기">
+  <div class="ct">
+    {[...groomRows, ...brideRows].map((r) => (
+      <div class="ct__row">
+        <div class="ct__who">
+          <span class="ct__role">{r.role}</span>
+          <span class="ct__name">{r.name}</span>
+        </div>
+        {r.phone && (
+          <div class="ct__actions">
+            <a class="ct__icon" href={`tel:${r.phone}`} aria-label={`${r.name}에게 전화`}>📞</a>
+            <a class="ct__icon" href={`sms:${r.phone}`} aria-label={`${r.name}에게 문자`}>✉️</a>
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+</Section>
+
+<style>
+  .ct { border: 1px solid var(--c-line); border-radius: var(--radius); overflow: hidden; background: var(--c-surface); }
+  .ct__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.1rem;
+    border-bottom: 1px solid var(--c-line);
+  }
+  .ct__row:last-child { border-bottom: none; }
+  .ct__role { font-size: 0.78rem; color: var(--c-accent); margin-right: 0.6rem; }
+  .ct__name { font-family: var(--font-serif-ko); font-size: 1rem; }
+  .ct__actions { display: flex; gap: 0.4rem; }
+  .ct__icon {
+    width: 36px; height: 36px;
+    display: grid; place-items: center;
+    border: 1px solid var(--c-line); border-radius: 999px;
+    text-decoration: none; font-size: 0.95rem;
+  }
+</style>

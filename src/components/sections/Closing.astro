@@ -1,0 +1,40 @@
+---
+import config from '@/lib/config';
+
+const { share, cover } = config;
+---
+
+<footer class="closing reveal">
+  <div class="divider" aria-hidden="true"></div>
+  <p class="closing__msg">{share.closingMessage}</p>
+  <p class="closing__names">{cover.groomName} · {cover.brideName}</p>
+  <p class="closing__credit muted">Thank you for celebrating with us</p>
+</footer>
+
+<style>
+  .closing {
+    text-align: center;
+    padding: 3rem 1.5rem 4.5rem;
+  }
+  .closing__msg {
+    white-space: pre-line;
+    font-family: var(--font-serif-ko);
+    font-size: 1rem;
+    line-height: 2;
+    color: var(--c-ink);
+    margin: 1rem 0 2rem;
+  }
+  .closing__names {
+    font-family: var(--font-serif-en);
+    font-size: 1.2rem;
+    letter-spacing: 0.06em;
+    color: var(--c-accent);
+    margin: 0 0 0.5rem;
+  }
+  .closing__credit {
+    font-family: var(--font-serif-en);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+</style>

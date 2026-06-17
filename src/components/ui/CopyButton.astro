@@ -1,0 +1,30 @@
+---
+/** 복사 버튼 — 계좌번호/주소/링크 복사. 카톡 웹뷰 폴백은 clipboard.ts 가 처리. */
+interface Props {
+  text: string;
+  label?: string;
+  toast?: string;
+  class?: string;
+}
+const { text, label = '복사', toast = '복사되었습니다', class: cls = '' } = Astro.props;
+---
+
+<button type="button" class:list={['btn', 'copy-btn', cls]} data-copy={text} data-toast={toast}>
+  {label}
+</button>
+
+<script>
+  import { copyText, toast as showToast } from '@/lib/clipboard';
+  // 문서 전체에 위임 리스너 1개만 등록(여러 버튼이 있어도 중복 방지).
+  const w = window as unknown as { __copyBound?: boolean };
+  if (!w.__copyBound) {
+    w.__copyBound = true;
+    document.addEventListener('click', async (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLElement>('.copy-btn');
+      if (!btn) return;
+      const text = btn.dataset.copy ?? '';
+      const ok = await copyText(text);
+      showToast(ok ? (btn.dataset.toast ?? '복사되었습니다') : '복사에 실패했어요');
+    });
+  }
+</script>
