@@ -76,7 +76,6 @@ export const wedding: WeddingConfig = {
       tmapUrl: 'https://map.life/6e0491e2',
       venuePageUrl: 'https://www.partyumhouse.com/location/#request',
     },
-    byCar: '건물 지하 주차장 2시간 무료 (이후 시간당 1,000원)',
   },
 
   contacts: {
