@@ -16,7 +16,7 @@ export const wedding: WeddingConfig = {
     groomName: '강민구',
     brideName: '유미진',
     datetimeISO: '2026-10-03T12:10:00+09:00', // 요일/D-day 전부 여기서 파생
-    venueShort: '○○웨딩홀 3F 그랜드볼룸',
+    venueShort: '파티움하우스 수원 파티움홀',
     dateHeroStyle: 'YYYY.MM.DD DAY',
     scrollCue: '아래로 넘겨주세요',
   },
@@ -66,14 +66,14 @@ export const wedding: WeddingConfig = {
   },
 
   location: {
-    venueName: '○○웨딩홀',
-    hallFloor: '3F 그랜드볼룸',
-    address: '서울특별시 강남구 테헤란로 000',
+    venueName: '파티움하우스 수원',
+    hallFloor: '파티움홀 (3층)',
+    address: '경기 수원시 팔달구 효원로 289',
     staticMapImage: '/images/map-static.png',
     directions: {
-      naverMapUrl: 'https://map.naver.com/',
-      kakaoMapUrl: 'https://map.kakao.com/',
-      tmapUrl: 'https://tmap.life/',
+      naverMapUrl: 'https://map.naver.com/p/search/파티움하우스%20수원',
+      kakaoMapUrl: 'https://map.kakao.com/link/to/파티움하우스%20수원,37.2616591,127.0334615',
+      tmapUrl: 'tmap://route?goalname=파티움하우스%20수원&goalx=127.0334615&goaly=37.2616591',
     },
     byCar: '건물 지하 주차장 2시간 무료 (이후 시간당 1,000원)',
     byTransit: '2호선 ○○역 3번 출구 도보 5분',
@@ -122,7 +122,7 @@ export const wedding: WeddingConfig = {
   share: {
     siteUrl: 'https://your-invitation.pages.dev',
     ogTitle: '민구 ♥ 미진 결혼합니다',
-    ogDescription: '2026.10.03 (토) 낮 12시 10분, ○○웨딩홀 3F 그랜드볼룸',
+    ogDescription: '2026.10.03 (토) 낮 12시 10분, 파티움하우스 수원 파티움홀',
     ogImage: 'https://your-invitation.pages.dev/images/og-1200x630.jpg',
     closingMessage:
       '소중한 분들을 모시고\n저희 두 사람의 약속을 나누고 싶습니다.\n함께해 주셔서 진심으로 감사합니다.',
