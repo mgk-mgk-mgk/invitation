@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { createPortal } from 'preact/compat';
 import type { GalleryImage } from '@/types/wedding';
 
 interface Props {
@@ -51,7 +52,9 @@ export default function Lightbox({ images }: Props) {
     if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
   };
 
-  return (
+  // body 로 포털: .reveal 섹션의 will-change/transform 이 만드는 containing block 에
+  // 갇혀 position:fixed 가 뷰포트가 아닌 섹션 기준으로 잡히던 문제를 회피.
+  return createPortal(
     <div class="lb" role="dialog" aria-modal="true" aria-label="사진 크게 보기" onClick={() => setIndex(null)}>
       <button class="lb__close" aria-label="닫기" onClick={() => setIndex(null)}>×</button>
       <button class="lb__nav lb__prev" aria-label="이전" onClick={(e) => { e.stopPropagation(); go(-1); }}>‹</button>
@@ -79,6 +82,7 @@ export default function Lightbox({ images }: Props) {
         .lb__count { position: absolute; bottom: calc(1.4rem + env(safe-area-inset-bottom));
           color: #fff; font-size: 0.85rem; letter-spacing: 0.1em; }
       `}</style>
-    </div>
+    </div>,
+    document.body,
   );
 }
