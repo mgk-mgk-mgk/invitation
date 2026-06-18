@@ -72,6 +72,7 @@ const weddingDayDow = dayOfWeekEn(cover.datetimeISO);
   .cal {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed; /* 7열 균등 — 예식일 강조 동그라미가 토요일 열만 넓히던 문제 방지 */
     text-align: center;
     max-width: 19rem;
     margin: 0 auto 1.5rem;
