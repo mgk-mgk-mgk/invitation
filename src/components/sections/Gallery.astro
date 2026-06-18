@@ -15,8 +15,9 @@ const { gallery } = config;
     ))}
   </div>
 
-  <!-- 풀스크린 뷰어(섬) — 썸네일은 정적, 오버레이만 hydrate -->
-  <Lightbox client:visible images={gallery.images} />
+  <!-- 풀스크린 뷰어(섬) — 닫힌 상태엔 아무것도 안 그리므로 client:visible 이면 영영 hydrate 안 됨.
+       클릭 위임 리스너가 붙어야 썸네일 클릭 → 확대가 동작하므로 client:idle 로 확실히 hydrate. -->
+  <Lightbox client:idle images={gallery.images} />
 </Section>
 
 <style>
