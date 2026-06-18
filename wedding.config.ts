@@ -45,7 +45,7 @@ export const wedding: WeddingConfig = {
   gallery: {
     enabled: true,
     layout: 'grid',
-    images: Array.from({ length: 9 }, (_, i) => {
+    images: Array.from({ length: 17 }, (_, i) => {
       const n = String(i + 1).padStart(2, '0');
       return { src: `/images/gallery/${n}.jpg`, alt: `웨딩 사진 ${i + 1}` };
     }),
