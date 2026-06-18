@@ -79,6 +79,7 @@ const configSchema = z.object({
     hallFloor: z.string().optional(),
     address: z.string().min(1),
     staticMapImage: z.string().min(1),
+    mapEmbedSrc: z.string().optional(),
     directions: z.object({
       naverMapUrl: z.string().optional(),
       kakaoMapUrl: z.string().optional(),

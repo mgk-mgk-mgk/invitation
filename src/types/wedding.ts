@@ -110,7 +110,8 @@ export interface WeddingConfig {
     venueName: string;
     hallFloor?: string;
     address: string;        // 복사 가능 폴백
-    staticMapImage: string; // 가벼운 정적 지도 이미지(카톡 웹뷰 안전)
+    staticMapImage: string; // 가벼운 정적 지도 이미지(카톡 웹뷰 안전) — mapEmbedSrc 없을 때 폴백
+    mapEmbedSrc?: string;   // 지도 임베드 iframe src(예: 구글 지도). 있으면 정적 이미지 대신 사용
     directions: {
       naverMapUrl?: string;
       kakaoMapUrl?: string;

@@ -70,6 +70,7 @@ export const wedding: WeddingConfig = {
     hallFloor: '파티움홀 (3층)',
     address: '경기 수원시 팔달구 효원로 289',
     staticMapImage: '/images/map-static.png',
+    mapEmbedSrc: 'https://maps.google.com/maps?q=파티움하우스%20수원&z=16&hl=ko&output=embed',
     directions: {
       naverMapUrl: 'https://map.naver.com/p/entry/place/12055125',
       kakaoMapUrl: 'https://map.kakao.com/?itemId=1818839884',
