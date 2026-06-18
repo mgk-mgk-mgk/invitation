@@ -10,7 +10,8 @@ const { gallery } = config;
   <div class:list={['grid', gallery.layout === 'carousel' && 'grid--scroll']}>
     {gallery.images.map((img, i) => (
       <button type="button" class="grid__item" data-gallery-item data-index={i} aria-label={`사진 ${i + 1} 크게 보기`}>
-        <img src={img.src} alt={img.alt} loading="lazy" decoding="async" width="400" height="400" />
+        {/* 그리드는 가벼운 정사각 썸네일(thumb/). 확대(라이트박스)는 원본(img.src)을 사용. */}
+        <img src={img.src.replace('/gallery/', '/gallery/thumb/')} alt={img.alt} loading="lazy" decoding="async" width="400" height="400" />
       </button>
     ))}
   </div>
