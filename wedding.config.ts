@@ -71,13 +71,12 @@ export const wedding: WeddingConfig = {
     address: '경기 수원시 팔달구 효원로 289',
     staticMapImage: '/images/map-static.png',
     directions: {
-      naverMapUrl: 'https://map.naver.com/p/search/파티움하우스%20수원',
-      kakaoMapUrl: 'https://map.kakao.com/link/to/파티움하우스%20수원,37.2616591,127.0334615',
-      tmapUrl: 'tmap://route?goalname=파티움하우스%20수원&goalx=127.0334615&goaly=37.2616591',
+      naverMapUrl: 'https://map.naver.com/p/entry/place/12055125',
+      kakaoMapUrl: 'https://map.kakao.com/?itemId=1818839884',
+      tmapUrl: 'https://map.life/6e0491e2',
+      venuePageUrl: 'https://www.partyumhouse.com/location/#request',
     },
     byCar: '건물 지하 주차장 2시간 무료 (이후 시간당 1,000원)',
-    byTransit: '2호선 ○○역 3번 출구 도보 5분',
-    byShuttle: '○○역 1번 출구에서 셔틀버스 운행 (11:30~13:00, 15분 간격)',
   },
 
   contacts: {

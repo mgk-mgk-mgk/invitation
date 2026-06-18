@@ -83,6 +83,7 @@ const configSchema = z.object({
       naverMapUrl: z.string().optional(),
       kakaoMapUrl: z.string().optional(),
       tmapUrl: z.string().optional(),
+      venuePageUrl: z.string().optional(),
     }),
     byCar: z.string().optional(),
     byTransit: z.string().optional(),

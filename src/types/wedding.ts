@@ -115,6 +115,7 @@ export interface WeddingConfig {
       naverMapUrl?: string;
       kakaoMapUrl?: string;
       tmapUrl?: string;
+      venuePageUrl?: string; // 예식장 공식 '약도 및 교통 안내' 페이지
     };
     byCar?: string;
     byTransit?: string;

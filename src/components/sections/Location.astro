@@ -20,6 +20,12 @@ const { directions } = loc;
   <!-- 가벼운 정적 지도(카톡 웹뷰 안전). 실제 지도는 길찾기 버튼으로. -->
   <img class="loc__map" src={loc.staticMapImage} alt={`${loc.venueName} 위치 지도`} loading="lazy" width="800" height="500" />
 
+  {directions.venuePageUrl && (
+    <div class="loc__pagelink">
+      <DeepLinkButton href={directions.venuePageUrl} label="약도 · 교통 안내" class="btn--wide" />
+    </div>
+  )}
+
   <div class="loc__links">
     {directions.naverMapUrl && <DeepLinkButton href={directions.naverMapUrl} label="네이버지도" />}
     {directions.kakaoMapUrl && <DeepLinkButton href={directions.kakaoMapUrl} label="카카오맵" />}
@@ -43,6 +49,8 @@ const { directions } = loc;
     border: 1px solid var(--c-line);
     margin-bottom: 1rem;
   }
+  .loc__pagelink { display: flex; justify-content: center; margin-bottom: 0.7rem; }
+  .loc__pagelink :global(.btn--wide) { width: 100%; max-width: 19rem; }
   .loc__links {
     display: flex;
     gap: 0.5rem;
