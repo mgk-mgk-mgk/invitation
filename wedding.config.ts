@@ -81,7 +81,7 @@ export const wedding: WeddingConfig = {
   },
 
   contacts: {
-    enabled: true,
+    enabled: false,
   },
 
   accounts: {
@@ -98,7 +98,7 @@ export const wedding: WeddingConfig = {
   },
 
   rsvp: {
-    enabled: true,
+    enabled: false,
     deadlineISO: '2026-10-10T23:59:59+09:00',
     askSide: true,
     askHeadcount: true,
@@ -106,7 +106,7 @@ export const wedding: WeddingConfig = {
   },
 
   guestbook: {
-    enabled: true,
+    enabled: false,
     moderation: 'auto-approve',
     allowPassword: true,
   },
