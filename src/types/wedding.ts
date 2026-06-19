@@ -103,7 +103,6 @@ export interface WeddingConfig {
   calendar: {
     enabled: boolean;
     showCountdown: boolean;
-    addToCalendar: boolean;
   };
 
   location: {

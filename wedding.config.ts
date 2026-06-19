@@ -62,7 +62,6 @@ export const wedding: WeddingConfig = {
   calendar: {
     enabled: true,
     showCountdown: true,
-    addToCalendar: true,
   },
 
   location: {

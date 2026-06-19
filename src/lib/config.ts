@@ -72,7 +72,6 @@ const configSchema = z.object({
   calendar: z.object({
     enabled: z.boolean(),
     showCountdown: z.boolean(),
-    addToCalendar: z.boolean(),
   }),
   location: z.object({
     venueName: z.string().min(1),

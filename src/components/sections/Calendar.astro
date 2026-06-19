@@ -2,9 +2,8 @@
 import Section from '@/components/ui/Section.astro';
 import config from '@/lib/config';
 import { monthGrid, dateKoFull, dayOfWeekEn } from '@/lib/datetime';
-import { buildICS, googleCalendarUrl } from '@/lib/ics';
 
-const { cover, calendar, location } = config;
+const { cover, calendar } = config;
 const g = monthGrid(cover.datetimeISO);
 const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -14,21 +13,6 @@ const cells: (number | null)[] = [
   ...Array.from({ length: g.daysInMonth }, (_, i) => i + 1),
 ];
 
-const title = `${cover.groomName} ♥ ${cover.brideName} 결혼식`;
-const ics = buildICS({
-  title,
-  startIso: cover.datetimeISO,
-  durationMinutes: 90,
-  location: `${location.venueName} ${location.hallFloor ?? ''}`.trim(),
-  description: dateKoFull(cover.datetimeISO),
-});
-const icsHref = `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
-const gcalHref = googleCalendarUrl({
-  title,
-  startIso: cover.datetimeISO,
-  durationMinutes: 90,
-  location: `${location.venueName} ${location.hallFloor ?? ''}`.trim(),
-});
 const weddingDayDow = dayOfWeekEn(cover.datetimeISO);
 ---
 
@@ -57,13 +41,6 @@ const weddingDayDow = dayOfWeekEn(cover.datetimeISO);
       <span id="dday-label">D-DAY</span>
       <span class="muted"> · {weddingDayDow}</span>
     </p>
-  )}
-
-  {calendar.addToCalendar && (
-    <div class="cal__actions">
-      <a class="btn" href={icsHref} download="wedding.ics">캘린더에 추가 (.ics)</a>
-      <a class="btn" href={gcalHref} target="_blank" rel="noopener noreferrer">구글 캘린더</a>
-    </div>
   )}
 </Section>
 
@@ -107,7 +84,6 @@ const weddingDayDow = dayOfWeekEn(cover.datetimeISO);
     color: var(--c-accent);
     margin: 0 0 1.5rem;
   }
-  .cal__actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
 </style>
 
 <script>
