@@ -195,9 +195,9 @@
 .ig-nav svg { width: 26px; height: 26px; }
 .ig-nav__me { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
 .ig-nav .is-active .ig-nav__me { box-shadow: 0 0 0 1.5px var(--ig-ink); }
+/* 가운데 두 칸 = 카카오 공유·링크 복사(아이콘만, 나머지 탭과 동일) */
 
-/* 떠 있는 섬: 하단 탭바 위로 올리고, BGM 토글은 상단바 아래로 */
-body:has(.ig) .sharebar { bottom: calc(60px + env(safe-area-inset-bottom)) !important; }
+/* 떠 있는 섬: BGM 토글은 상단바 아래로(공유·복사는 하단 탭바로 이동) */
 body:has(.ig) .bgm { top: calc(52px + env(safe-area-inset-top)); z-index: 46; }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,19 +1,38 @@
 ---
-import { home, search, plusSquare, heart } from './icons';
+import { home, search, share as shareIcon, link as linkIcon } from './icons';
+
+interface SharePayload {
+  title: string;
+  description: string;
+  imageUrl: string; // 절대 https
+  linkUrl: string;  // 절대 https
+}
 
 interface Props {
   avatar: string;
-  accountsHref?: string;
+  share: SharePayload;
 }
-const { avatar, accountsHref } = Astro.props;
+const { avatar, share: s } = Astro.props;
 ---
 
+{/* 하단 탭바 — 가운데 두 칸을 카카오 공유·링크 복사 액션으로(클릭은 IgApp 위임 스크립트에서 처리) */}
 <nav class="ig-nav" aria-label="하단 메뉴">
   <button type="button" data-nav="top" aria-label="홈"><Fragment set:html={home} /></button>
   <button type="button" data-nav="top" aria-label="검색"><Fragment set:html={search} /></button>
-  {accountsHref
-    ? <a href={accountsHref} data-target={accountsHref} aria-label="추가"><Fragment set:html={plusSquare} /></a>
-    : <button type="button" data-nav="top" aria-label="추가"><Fragment set:html={plusSquare} /></button>}
-  <button type="button" data-nav="top" aria-label="좋아요"><Fragment set:html={heart} /></button>
+  <button
+    type="button"
+    data-share-kakao
+    data-title={s.title}
+    data-desc={s.description}
+    data-image={s.imageUrl}
+    data-link={s.linkUrl}
+    aria-label="카카오톡 공유"
+  ><Fragment set:html={shareIcon} /></button>
+  <button
+    type="button"
+    data-copy-link
+    data-link={s.linkUrl}
+    aria-label="링크 복사"
+  ><Fragment set:html={linkIcon} /></button>
   <button type="button" class="is-active" data-nav="top" aria-label="프로필"><img class="ig-nav__me" src={avatar} alt="" width="26" height="26" /></button>
 </nav>

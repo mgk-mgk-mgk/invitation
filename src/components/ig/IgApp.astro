@@ -1,7 +1,8 @@
 ---
 // 인스타그램 UI 본문 오케스트레이터 (캐주얼판의 Invitation.astro 대응).
-// 상단바·프로필·하이라이트·그리드·피드·하단탭바를 조립하고, 떠 있는 섬(ShareBar/BgmToggle)을 띄우며,
-// 단 하나의 위임 스크립트로 좋아요/더블탭/하이라이트 스크롤/팔로잉/D-day를 처리합니다.
+// 상단바·프로필·하이라이트·그리드·피드·하단탭바를 조립하고, 떠 있는 섬(BgmToggle)을 띄우며,
+// 단 하나의 위임 스크립트로 좋아요/더블탭/하이라이트 스크롤/팔로잉/공유·복사/D-day를 처리합니다.
+// (카카오 공유·링크 복사는 하단 탭바 가운데 두 칸에 통합 — 격식판은 ShareBar 섬 그대로.)
 import '@/styles/instagram.css';
 import IgTopBar from './IgTopBar.astro';
 import IgProfileHeader from './IgProfileHeader.astro';
@@ -11,7 +12,6 @@ import IgFeed from './IgFeed.astro';
 import IgBottomNav from './IgBottomNav.astro';
 
 import BgmToggle from '@/components/ui/BgmToggle.astro';
-import ShareBar from '@/components/islands/ShareBar.tsx';
 
 import defaultConfig from '@/lib/config.casual';
 import type { WeddingConfig } from '@/types/wedding';
@@ -45,20 +45,23 @@ const postCount = posts.length;
   <IgFeed config={c} handle={HANDLE} />
 </div>
 
-<IgBottomNav avatar={c.cover.heroImage} accountsHref={c.accounts.enabled ? '#post-accounts' : undefined} />
-
-{/* 떠 있는 컨트롤 — 기존 섬 그대로(스타일은 instagram.css 에서 하단탭바 위로 보정) */}
-{c.bgm.enabled && <BgmToggle src={c.bgm.src} />}
-<ShareBar
-  client:idle
-  title={c.share.ogTitle}
-  description={c.share.ogDescription}
-  imageUrl={c.share.ogImage}
-  linkUrl={c.share.siteUrl}
+<IgBottomNav
+  avatar={c.cover.heroImage}
+  share={{
+    title: c.share.ogTitle,
+    description: c.share.ogDescription,
+    imageUrl: c.share.ogImage,
+    linkUrl: c.share.siteUrl,
+  }}
 />
+
+{/* 떠 있는 컨트롤 — BGM 토글(공유·복사는 하단 탭바로 이동) */}
+{c.bgm.enabled && <BgmToggle src={c.bgm.src} />}
 
 <script>
   import { dDayLabel } from '@/lib/datetime';
+  import { shareToKakao } from '@/lib/kakao';
+  import { copyText, toast } from '@/lib/clipboard';
 
   // ── D-day: 빌드 시점 고정 방지 위해 클라이언트에서 계산(Calendar.astro 패턴) ──
   document.querySelectorAll<HTMLElement>('[data-dday]').forEach((el) => {
@@ -110,6 +113,37 @@ const postCount = posts.length;
     if (follow) {
       const on = follow.classList.toggle('is-following');
       follow.textContent = on ? '팔로잉' : '팔로우';
+      return;
+    }
+
+    // 카카오톡 공유(하단 탭바) — SDK 미설정/실패 시 링크복사로 폴백
+    const shareBtn = t.closest<HTMLElement>('[data-share-kakao]');
+    if (shareBtn) {
+      e.preventDefault();
+      const d = shareBtn.dataset;
+      const link = d.link || '';
+      shareToKakao({
+        title: d.title || '',
+        description: d.desc || '',
+        imageUrl: d.image || '',
+        linkUrl: link,
+      }).then((ok) => {
+        if (!ok) {
+          copyText(link).then((copied) =>
+            toast(copied ? '카카오 공유 미설정 — 링크를 복사했어요' : '공유에 실패했어요'),
+          );
+        }
+      });
+      return;
+    }
+
+    // 링크 복사(하단 탭바)
+    const copyBtn = t.closest<HTMLElement>('[data-copy-link]');
+    if (copyBtn) {
+      e.preventDefault();
+      copyText(copyBtn.dataset.link || '').then((copied) =>
+        toast(copied ? '청첩장 링크가 복사되었습니다' : '복사에 실패했어요'),
+      );
       return;
     }
 
