@@ -1,5 +1,6 @@
 ---
 import { more, share as shareIcon, link as linkIcon, verified } from './icons';
+import BgmToggle from '@/components/ui/BgmToggle.astro';
 
 interface SharePayload {
   title: string;
@@ -11,12 +12,14 @@ interface SharePayload {
 interface Props {
   handle: string;
   share: SharePayload;
+  bgmSrc?: string;  // 있으면 상단바 아이디 왼쪽에 음악 토글 배치
 }
-const { handle, share: s } = Astro.props;
+const { handle, share: s, bgmSrc } = Astro.props;
 ---
 
-{/* 뒤로가기 화살표는 제거 — 아이디는 좌측, ⋮ 메뉴는 우측(공유하기·링크복사) */}
+{/* 음악 토글은 아이디 왼쪽, ⋮ 메뉴는 우측(공유하기·링크복사). 뒤로가기 화살표는 제거. */}
 <header class="ig-top">
+  {bgmSrc && <BgmToggle src={bgmSrc} />}
   <span class="ig-top__user">{handle}<span class="ig-vrf" set:html={verified} /></span>
   <details class="ig-menu" data-autoclose>
     <summary class="ig-top__more" aria-label="메뉴"><Fragment set:html={more} /></summary>

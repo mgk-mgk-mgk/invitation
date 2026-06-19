@@ -11,7 +11,6 @@ import IgPhotoGrid from './IgPhotoGrid.astro';
 import IgFeed from './IgFeed.astro';
 import IgBottomNav from './IgBottomNav.astro';
 
-import BgmToggle from '@/components/ui/BgmToggle.astro';
 
 import defaultConfig from '@/lib/config.casual';
 import type { WeddingConfig } from '@/types/wedding';
@@ -39,6 +38,7 @@ const postCount = posts.length;
 <div class="ig">
   <IgTopBar
     handle={HANDLE}
+    bgmSrc={c.bgm.enabled ? c.bgm.src : undefined}
     share={{
       title: c.share.ogTitle,
       description: c.share.ogDescription,
@@ -62,8 +62,6 @@ const postCount = posts.length;
   }}
 />
 
-{/* 떠 있는 컨트롤 — BGM 토글(공유·복사는 하단 탭바로 이동) */}
-{c.bgm.enabled && <BgmToggle src={c.bgm.src} />}
 
 <script>
   import { dDayLabel } from '@/lib/datetime';
