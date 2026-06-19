@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       # 빌드타임에 인라인되는 PUBLIC_* 값을 .env 로 주입합니다.
