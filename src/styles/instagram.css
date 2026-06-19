@@ -219,7 +219,14 @@
 .ig-addr .btn.copy-btn { border: 1px solid var(--ig-line); border-radius: 6px; padding: .25rem .55rem; font-size: .72rem; background: var(--ig-surface); color: var(--ig-ink); }
 
 .ig-acct { display: grid; gap: 8px; padding: 8px 14px 2px; }
-.ig-acct__side { font-size: .72rem; color: var(--c-accent); font-weight: 700; margin: 6px 0 0; }
+/* 마음 전하실 곳 — 신랑/신부측 접이식 드롭다운(격식판 아코디언과 동일 동작) */
+.ig-acct__group { border: 1px solid var(--ig-line); border-radius: 10px; background: var(--ig-surface); overflow: hidden; }
+.ig-acct__group > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 12px; font-size: .82rem; font-weight: 600; color: var(--ig-ink); }
+.ig-acct__group > summary::-webkit-details-marker { display: none; }
+.ig-acct__chev { color: var(--c-accent); font-size: 1.15rem; line-height: 1; transition: transform .2s ease; }
+.ig-acct__group[open] .ig-acct__chev { transform: rotate(90deg); }
+.ig-acct__rows { padding: 4px 12px; border-top: 1px solid var(--ig-line); }
 .ig-acct__row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; border-bottom: 1px dashed var(--ig-line); }
 .ig-acct__row:last-child { border-bottom: 0; }
 .ig-acct__who { font-size: .82rem; margin: 0; }

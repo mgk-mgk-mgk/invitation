@@ -119,32 +119,44 @@ const hasNotices = notices.declineWreath || notices.items.length > 0;
       </Fragment>
       <Fragment slot="extra">
         <div class="ig-acct">
-          {groomAcct.length > 0 && <p class="ig-acct__side">신랑측</p>}
-          {groomAcct.map((a) => (
-            <div class="ig-acct__row">
-              <div>
-                <p class="ig-acct__who">{a.holderLabel}</p>
-                <p class="ig-acct__num">{a.bank} {a.number}</p>
+          {groomAcct.length > 0 && (
+            <details class="ig-acct__group">
+              <summary>신랑측 계좌번호<span class="ig-acct__chev" aria-hidden="true">›</span></summary>
+              <div class="ig-acct__rows">
+                {groomAcct.map((a) => (
+                  <div class="ig-acct__row">
+                    <div>
+                      <p class="ig-acct__who">{a.holderLabel}</p>
+                      <p class="ig-acct__num">{a.bank} {a.number}</p>
+                    </div>
+                    <div class="ig-acct__btns">
+                      <CopyButton text={a.number} label="복사" toast="계좌번호가 복사되었습니다" />
+                      {a.kakaoPayUrl && <DeepLinkButton href={a.kakaoPayUrl} label="카카오페이" class="btn--kakaopay" />}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div class="ig-acct__btns">
-                <CopyButton text={a.number} label="복사" toast="계좌번호가 복사되었습니다" />
-                {a.kakaoPayUrl && <DeepLinkButton href={a.kakaoPayUrl} label="카카오페이" class="btn--kakaopay" />}
+            </details>
+          )}
+          {brideAcct.length > 0 && (
+            <details class="ig-acct__group">
+              <summary>신부측 계좌번호<span class="ig-acct__chev" aria-hidden="true">›</span></summary>
+              <div class="ig-acct__rows">
+                {brideAcct.map((a) => (
+                  <div class="ig-acct__row">
+                    <div>
+                      <p class="ig-acct__who">{a.holderLabel}</p>
+                      <p class="ig-acct__num">{a.bank} {a.number}</p>
+                    </div>
+                    <div class="ig-acct__btns">
+                      <CopyButton text={a.number} label="복사" toast="계좌번호가 복사되었습니다" />
+                      {a.kakaoPayUrl && <DeepLinkButton href={a.kakaoPayUrl} label="카카오페이" class="btn--kakaopay" />}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))}
-          {brideAcct.length > 0 && <p class="ig-acct__side">신부측</p>}
-          {brideAcct.map((a) => (
-            <div class="ig-acct__row">
-              <div>
-                <p class="ig-acct__who">{a.holderLabel}</p>
-                <p class="ig-acct__num">{a.bank} {a.number}</p>
-              </div>
-              <div class="ig-acct__btns">
-                <CopyButton text={a.number} label="복사" toast="계좌번호가 복사되었습니다" />
-                {a.kakaoPayUrl && <DeepLinkButton href={a.kakaoPayUrl} label="카카오페이" class="btn--kakaopay" />}
-              </div>
-            </div>
-          ))}
+            </details>
+          )}
         </div>
       </Fragment>
     </IgPost>

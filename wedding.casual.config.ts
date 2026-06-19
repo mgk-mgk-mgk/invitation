@@ -24,7 +24,7 @@ export const weddingCasual: WeddingConfig = {
     theme: 'blush', // 격식판(ivory)과 무드 구분
   },
 
-  cover: { ...coverBase, scrollCue: '아래로 살짝 내려보세요', profileImage: '/images/gallery/17.jpg' },
+  cover: { ...coverBase, scrollCue: '아래로 살짝 내려보세요', profileImage: '/images/gallery/17.jpg', venueShort: '파티움하우스 수원, 파티움홀(3층)' },
 
   bgm,
 
