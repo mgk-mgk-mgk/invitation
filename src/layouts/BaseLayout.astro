@@ -30,8 +30,8 @@ const faviconHref = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`
     <meta name="twitter:description" content={share.ogDescription} />
     <meta name="twitter:image" content={share.ogImage} />
 
-    <!-- 히어로는 성역(LCP): 미리 불러옵니다 -->
-    <link rel="preload" as="image" href={cover.heroImage} fetchpriority="high" />
+    <!-- 위쪽 핵심 이미지(LCP) 미리 불러오기: 캐주얼은 프로필 아바타, 격식판은 히어로 -->
+    <link rel="preload" as="image" href={cover.profileImage ?? cover.heroImage} fetchpriority="high" />
   </head>
   <body>
     <main class="phone">

@@ -24,7 +24,7 @@ export const weddingCasual: WeddingConfig = {
     theme: 'blush', // 격식판(ivory)과 무드 구분
   },
 
-  cover: { ...coverBase, scrollCue: '아래로 살짝 내려보세요' },
+  cover: { ...coverBase, scrollCue: '아래로 살짝 내려보세요', profileImage: '/images/gallery/17.jpg' },
 
   bgm,
 
@@ -46,6 +46,9 @@ export const weddingCasual: WeddingConfig = {
       { date: '2024.12', title: '프러포즈', body: '"평생 같이 웃자"는 약속을 나눴습니다.' },
       { date: '2026.10', title: '결혼', body: '이제 부부로 새로운 이야기를 시작해요.' },
     ],
+    // 우리 둘의 짧은 영상 — public/video/ 에 파일을 넣고 경로를 맞춰주세요.
+    filmSrc: '/video/our-moment.mp4',
+    // filmPoster: '/images/film-poster.jpg', // (선택) 영상 포스터 이미지. 생략 시 영상 첫 프레임을 포스터·썸네일로 사용(피드와 동일 내용).
   },
 
   calendar,

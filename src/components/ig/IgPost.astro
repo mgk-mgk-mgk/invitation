@@ -30,9 +30,9 @@ const { postId, handle, avatar, locationTag, likes, timeAgo, serifCaption = fals
 
   <div class="ig-arow">
     <button type="button" data-like aria-label="좋아요"><Fragment set:html={heart} /></button>
-    <button type="button" aria-label="댓글"><Fragment set:html={comment} /></button>
-    <button type="button" aria-label="공유"><Fragment set:html={share} /></button>
-    <button type="button" class="ig-arow__save" aria-label="저장"><Fragment set:html={bookmark} /></button>
+    <button type="button" data-comment-burst aria-label="댓글"><Fragment set:html={comment} /></button>
+    <button type="button" data-share-fly aria-label="공유"><Fragment set:html={share} /></button>
+    <button type="button" class="ig-arow__save" data-save={postId} aria-label="저장"><Fragment set:html={bookmark} /></button>
   </div>
 
   <p class="ig-likes">좋아요 <span data-like-count>{likes}</span>개</p>

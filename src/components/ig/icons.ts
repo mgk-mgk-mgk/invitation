@@ -48,6 +48,10 @@ export const reelsIcon =
 export const tagIcon =
   `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.2"/><path d="M5 20c.6-3.5 3.4-5.5 7-5.5s6.4 2 7 5.5"/></svg>`;
 
+/** 빈 탭(게시물 없음) 상태용 동영상(캠코더) 아이콘 */
+export const video =
+  `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.5" width="13" height="11" rx="2.5"/><path d="M15.5 10.5 21 7.5v9l-5.5-3z"/></svg>`;
+
 /** 인증 배지(블루) — @아이디·이름·게시물 헤더에 재사용 */
 export const verified =
   `<svg viewBox="0 0 24 24" width="15" height="15"><circle cx="12" cy="12" r="10" fill="#3897f0"/><path d="M10.3 15.4 6.8 11.9l1.3-1.3 2.2 2.2 5.1-5.1 1.3 1.3z" fill="#fff"/></svg>`;

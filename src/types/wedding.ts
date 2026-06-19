@@ -64,6 +64,7 @@ export interface WeddingConfig {
 
   cover: {
     heroImage: string;
+    profileImage?: string;  // (캐주얼) 인스타 프로필 아바타 — 생략 시 heroImage 사용
     groomName: string;
     brideName: string;
     /** '2026-10-17T13:00:00+09:00' — 요일/날짜히어로/D-day 전부 여기서 파생 */
@@ -98,6 +99,8 @@ export interface WeddingConfig {
     groomProfile?: string;
     brideProfile?: string;
     timeline?: TimelineItem[];
+    filmSrc?: string;      // 우리 둘의 짧은 영상(자체 호스팅 mp4) — 캐주얼 피드 '동영상' 게시물
+    filmPoster?: string;   // 영상 포스터(없으면 히어로 이미지로 대체)
   };
 
   calendar: {

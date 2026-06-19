@@ -9,20 +9,25 @@ interface Props {
   postCount: number;
 }
 const { config, postCount } = Astro.props;
-const { cover, gallery, greeting, accounts, location } = config;
+const { cover, gallery, greeting, accounts } = config;
+const avatar = cover.profileImage ?? cover.heroImage;
 
 const tagline = greeting.message.split('\n')[0];
 const dateLine = dateHero(cover.datetimeISO, cover.dateHeroStyle ?? 'YYYY.MM.DD DAY');
 
-// 메시지 보내기 — 누르면 신랑/신부 중 선택해 실제 문자(SMS) 앱이 열립니다. 번호 없는 쪽은 생략.
+// 메시지 보내기 — 실제 문자(SMS) 앱을 엽니다. 대상이 둘이면 선택 팝오버, 하나면 바로 링크.
+// 신부는 일단 제외(번호 준비되면 아래 brideSms 의 주석을 해제).
 const smsHref = (p?: string) => (p ? `sms:${p.replace(/[^0-9+]/g, '')}` : null);
 const groomSms = smsHref(greeting.groom.person.phone);
-const brideSms = smsHref(greeting.bride.person.phone);
-const canMessage = Boolean(groomSms || brideSms);
+const brideSms: string | null = null; // smsHref(greeting.bride.person.phone);
+const msgTargets = [
+  groomSms && { href: groomSms, label: '신랑에게 문자' },
+  brideSms && { href: brideSms, label: '신부에게 문자' },
+].filter(Boolean) as { href: string; label: string }[];
 ---
 
 <section class="ig-profile">
-  <span class="ig-ring"><img src={cover.heroImage} alt="프로필 사진" width="84" height="84" /></span>
+  <span class="ig-ring"><img src={avatar} alt="프로필 사진" width="84" height="84" /></span>
   <div class="ig-stats">
     <div><b>{postCount}</b><span>게시물</span></div>
     <div><b>{gallery.images.length}</b><span>사진</span></div>
@@ -43,16 +48,16 @@ const canMessage = Boolean(groomSms || brideSms);
 
 <div class="ig-actions">
   <button class="ig-btn ig-btn--primary is-following" type="button" data-follow>팔로잉</button>
-  {canMessage ? (
-    <details class="ig-msg">
+  {msgTargets.length > 1 ? (
+    <details class="ig-msg" data-autoclose>
       <summary class="ig-btn ig-btn--secondary">메시지 보내기</summary>
       <div class="ig-msg__menu" role="menu">
-        {groomSms && <a role="menuitem" href={groomSms}>신랑에게 문자</a>}
-        {brideSms && <a role="menuitem" href={brideSms}>신부에게 문자</a>}
+        {msgTargets.map((m) => <a role="menuitem" href={m.href}>{m.label}</a>)}
       </div>
     </details>
+  ) : msgTargets.length === 1 ? (
+    <a class="ig-btn ig-btn--secondary" href={msgTargets[0].href} aria-label={msgTargets[0].label}>메시지 보내기</a>
   ) : (
     accounts.enabled && <a class="ig-btn ig-btn--secondary" href="#post-accounts" data-target="#post-accounts">메시지</a>
   )}
-  <a class="ig-btn ig-btn--secondary ig-btn--icon" href="#post-location" data-target="#post-location" aria-label={`${location.venueName} 위치`}>▾</a>
 </div>

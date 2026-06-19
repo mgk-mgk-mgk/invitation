@@ -28,7 +28,7 @@ export const bgm: WeddingConfig['bgm'] = {
 /** 혼인 당사자·혼주(이름·전화·계보). greeting.message(인사말)만 버전별로 다릅니다. */
 export const families: Pick<WeddingConfig['greeting'], 'groom' | 'bride'> = {
   groom: {
-    person: { name: '강민구', phone: '010-1234-5678', birthOrder: '장남' },
+    person: { name: '강민구', phone: '010-5180-2962', birthOrder: '장남' },
     father: { name: '김아버지', phone: '010-1111-1111' },
     mother: { name: '박어머니', phone: '010-2222-2222' },
   },

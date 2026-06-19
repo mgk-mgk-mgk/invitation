@@ -1,14 +1,41 @@
 ---
-import { chevronLeft, more, verified } from './icons';
+import { more, share as shareIcon, link as linkIcon, verified } from './icons';
+
+interface SharePayload {
+  title: string;
+  description: string;
+  imageUrl: string; // 절대 https
+  linkUrl: string;  // 절대 https
+}
 
 interface Props {
   handle: string;
+  share: SharePayload;
 }
-const { handle } = Astro.props;
+const { handle, share: s } = Astro.props;
 ---
 
+{/* 뒤로가기 화살표는 제거 — 아이디는 좌측, ⋮ 메뉴는 우측(공유하기·링크복사) */}
 <header class="ig-top">
-  <button class="ig-top__back" type="button" data-nav="top" aria-label="뒤로"><Fragment set:html={chevronLeft} /></button>
   <span class="ig-top__user">{handle}<span class="ig-vrf" set:html={verified} /></span>
-  <button class="ig-top__more" type="button" aria-label="메뉴"><Fragment set:html={more} /></button>
+  <details class="ig-menu" data-autoclose>
+    <summary class="ig-top__more" aria-label="메뉴"><Fragment set:html={more} /></summary>
+    <div class="ig-menu__sheet" role="menu">
+      <button
+        type="button"
+        role="menuitem"
+        data-share-kakao
+        data-title={s.title}
+        data-desc={s.description}
+        data-image={s.imageUrl}
+        data-link={s.linkUrl}
+      ><span class="ig-menu__ic" set:html={shareIcon} />공유하기</button>
+      <button
+        type="button"
+        role="menuitem"
+        data-copy-link
+        data-link={s.linkUrl}
+      ><span class="ig-menu__ic" set:html={linkIcon} />링크복사</button>
+    </div>
+  </details>
 </header>

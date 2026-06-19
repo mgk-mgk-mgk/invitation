@@ -39,6 +39,7 @@ const configSchema = z.object({
   }),
   cover: z.object({
     heroImage: z.string().min(1),
+    profileImage: z.string().optional(),
     groomName: z.string().min(1),
     brideName: z.string().min(1),
     datetimeISO: isoDate,
@@ -68,6 +69,8 @@ const configSchema = z.object({
     timeline: z
       .array(z.object({ date: z.string(), title: z.string(), body: z.string().optional() }))
       .optional(),
+    filmSrc: z.string().optional(),
+    filmPoster: z.string().optional(),
   }),
   calendar: z.object({
     enabled: z.boolean(),
@@ -167,9 +170,12 @@ export function buildConfig(raw: unknown, routeBase = ''): WeddingConfig {
 
   const data = parsed.data as WeddingConfig;
   data.cover.heroImage = withBase(data.cover.heroImage);
+  if (data.cover.profileImage) data.cover.profileImage = withBase(data.cover.profileImage);
   data.bgm.src = withBase(data.bgm.src);
   data.location.staticMapImage = withBase(data.location.staticMapImage);
   data.gallery.images = data.gallery.images.map((img) => ({ ...img, src: withBase(img.src) }));
+  if (data.coupleStory.filmSrc) data.coupleStory.filmSrc = withBase(data.coupleStory.filmSrc);
+  if (data.coupleStory.filmPoster) data.coupleStory.filmPoster = withBase(data.coupleStory.filmPoster);
   data.share.siteUrl = SITE ? SITE + routeBase : data.share.siteUrl;
   data.share.ogImage = toAbsolute(data.share.ogImage);
   return data;

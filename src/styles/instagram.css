@@ -35,9 +35,23 @@
   height: 44px; padding: 0 10px;
   background: var(--ig-surface); border-bottom: 1px solid var(--ig-line);
 }
-.ig-top__back, .ig-top__more { width: 24px; height: 24px; display: grid; place-items: center; background: none; border: 0; cursor: pointer; }
+.ig-top__more { width: 24px; height: 24px; display: grid; place-items: center; background: none; border: 0; cursor: pointer; }
 .ig-top__user { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 4px; }
-.ig-top__more { margin-left: auto; }
+
+/* 상단 ⋮ 메뉴 = 공유하기·링크복사 드롭다운(details, JS 없이 동작) */
+.ig-menu { position: relative; margin-left: auto; display: flex; }
+.ig-menu > summary { list-style: none; }
+.ig-menu > summary::-webkit-details-marker { display: none; }
+.ig-menu__sheet { position: absolute; top: calc(100% + 8px); right: 0; min-width: 156px; z-index: 60;
+  background: var(--ig-surface); border: 1px solid var(--ig-line); border-radius: 12px; overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0,0,0,.16); }
+.ig-menu__sheet button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 16px;
+  background: none; border: 0; font-family: inherit; font-size: 14px; font-weight: 600; color: var(--ig-ink);
+  text-align: left; cursor: pointer; }
+.ig-menu__sheet button + button { border-top: 1px solid var(--ig-line); }
+.ig-menu__sheet button:active { background: var(--ig-secondary); }
+.ig-menu__ic { display: inline-grid; place-items: center; }
+.ig-menu__ic svg { width: 18px; height: 18px; }
 
 /* ── 아바타 + 스토리 링(정통 그라데이션) ─────────────────── */
 .ig-ring { padding: 2px; border-radius: 50%; background: var(--ig-ring); flex: 0 0 auto; display: inline-block; }
@@ -87,6 +101,21 @@
 .ig-grid button { position: relative; aspect-ratio: 1 / 1; padding: 0; border: 0; background: var(--ig-line); cursor: pointer; overflow: hidden; }
 .ig-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
+/* 그리드 탭 뷰 전환 + 빈 상태(동영상 = '게시물 없음') */
+.ig-grid[hidden], .ig-empty[hidden] { display: none; }  /* .ig-grid display:grid 를 이기도록 [hidden] 명시 */
+.ig-empty { display: grid; place-items: center; gap: 12px; padding: 48px 24px 56px; text-align: center; background: var(--ig-surface); }
+.ig-empty__icon { width: 62px; height: 62px; border-radius: 50%; border: 2px solid var(--ig-ink); display: grid; place-items: center; }
+.ig-empty__icon svg { width: 30px; height: 30px; }
+.ig-empty__title { margin: 0; font-size: 20px; font-weight: 700; color: var(--ig-ink); }
+/* 동영상 탭 영상 썸네일(릴스 배지) — 클릭 시 #post-film 로 이동 */
+.ig-reel-thumb { position: relative; display: block; aspect-ratio: 1 / 1; background: var(--ig-line); overflow: hidden; }
+.ig-reel-thumb img, .ig-reel-thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ig-reel-badge { position: absolute; top: 6px; right: 6px; color: #fff; display: grid; place-items: center;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.55)); }
+.ig-reel-badge svg { width: 18px; height: 18px; }
+/* 3×3 기본 틀의 빈 칸 — 흰 공백(게시물 적어도 그리드 모양·높이 유지) */
+.ig-cell-blank { aspect-ratio: 1 / 1; background: var(--ig-surface); }
+
 /* ── 게시물 ─────────────────────────────────────────────── */
 .ig-feed { margin-top: 8px; }
 .ig-post { background: var(--ig-surface); border-top: 1px solid var(--ig-line); scroll-margin-top: 52px; }
@@ -102,7 +131,8 @@
 /* 미디어: 모던 IG 세로 4:5 (지도/사진/아트카드 공통) */
 .ig-post__media { position: relative; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; background: var(--ig-line); }
 .ig-post__media > img,
-.ig-post__media > iframe { width: 100%; height: 100%; object-fit: cover; display: block; border: 0; }
+.ig-post__media > iframe,
+.ig-post__media > video { width: 100%; height: 100%; object-fit: cover; display: block; border: 0; }
 
 /* 사진 없는 게시물용 블러시 아트카드 */
 .ig-artcard { width: 100%; height: 100%; display: grid; place-content: center; gap: 10px; text-align: center;
@@ -120,8 +150,10 @@
 .ig-slide__title { font-family: var(--font-serif-ko); font-size: 1.3rem; }
 .ig-slide__body { font-size: .85rem; color: var(--c-ink-soft); line-height: 1.7; margin: 0; }
 .ig-dots { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; gap: 5px; justify-content: center; }
-.ig-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.7); }
-.ig-dots i:first-child { background: var(--ig-blue); }
+.ig-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.7); transition: background .2s ease; }
+.ig-dots i:first-child { background: var(--ig-blue); }           /* JS 꺼졌을 때 기본값 */
+.ig-dots.is-live i { background: rgba(255,255,255,.7); }         /* JS 켜지면 현재 슬라이드만 활성 */
+.ig-dots.is-live i.is-active { background: var(--ig-blue); }
 
 /* 예식 안내 = 달력 아트카드 */
 .ig-cal { width: 100%; height: 100%; display: grid; place-content: center; gap: 12px; padding: 20px;
@@ -141,6 +173,29 @@
 .ig-arow__save { margin-left: auto; }
 .ig-arow [data-like].liked svg { fill: var(--ig-heart); stroke: var(--ig-heart); }
 .ig-likes { padding: 2px 14px 0; font-size: 14px; font-weight: 700; margin: 0; }
+
+/* 저장(북마크) 토글 — 채움 + 작은 바운스(좋아요와 동질 언어) */
+.ig-arow__save.saved svg { fill: var(--ig-heart); stroke: var(--ig-heart); }
+.ig-arow__save.save-pop { animation: ig-save-pop .3s ease; }
+@keyframes ig-save-pop { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.18); } }
+
+/* 공유(종이비행기) — 날아갔다 돌아오는 모션 */
+.ig-arow [data-share-fly] svg.fly { animation: ig-plane-fly .5s ease; }
+@keyframes ig-plane-fly {
+  0%   { transform: translate(0,0) rotate(0); opacity: 1; }
+  40%  { transform: translate(14px,-16px) rotate(20deg); opacity: 0; }
+  41%  { transform: translate(-10px,8px) rotate(-10deg); opacity: 0; }
+  100% { transform: translate(0,0) rotate(0); opacity: 1; }
+}
+
+/* 댓글 이모지 버스트 — JS가 body 직속으로 생성, 떠오르며 사라짐 */
+.ig-burst { position: fixed; z-index: 70; font-size: 18px; pointer-events: none;
+  animation: ig-burst-rise 1s ease forwards; animation-delay: var(--d, 0ms); will-change: transform, opacity; }
+@keyframes ig-burst-rise {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(.6); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%,-50%) translate(var(--dx, 0), -60px) scale(1.1); }
+}
 
 /* 캡션 */
 .ig-caption { padding: 4px 14px 0; font-size: 14px; line-height: 1.5; }
@@ -202,9 +257,10 @@
   display: flex; justify-content: space-around; align-items: center;
   background: var(--ig-surface); border-top: 1px solid var(--ig-line); z-index: 45;
 }
-.ig-nav > * { background: none; border: 0; color: var(--ig-ink); width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; }
+.ig-nav > * { background: none; border: 0; padding: 0; color: var(--ig-ink); width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; }
 .ig-nav svg { width: 26px; height: 26px; }
-.ig-nav__me { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+/* max-width:none — 전역 img{max-width:100%} 가 폭만 줄여 타원이 되는 것 방지(정원 유지) */
+.ig-nav__me { width: 26px; height: 26px; max-width: none; border-radius: 50%; object-fit: cover; }
 .ig-nav .is-active .ig-nav__me { box-shadow: 0 0 0 1.5px var(--ig-ink); }
 /* 가운데 두 칸 = 카카오 공유·링크 복사(아이콘만, 나머지 탭과 동일) */
 
@@ -212,5 +268,6 @@
 body:has(.ig) .bgm { top: calc(52px + env(safe-area-inset-top)); z-index: 46; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ig-post.liked-burst .ig-heartpop, .pulse { animation: none; }
+  .ig-post.liked-burst .ig-heartpop, .pulse,
+  .ig-arow__save.save-pop, .ig-arow [data-share-fly] svg.fly { animation: none; }
 }

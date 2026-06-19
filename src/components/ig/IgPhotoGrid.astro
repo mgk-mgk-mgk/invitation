@@ -1,28 +1,54 @@
 ---
 import Lightbox from '@/components/islands/Lightbox.tsx';
-import { gridIcon, reelsIcon, tagIcon } from './icons';
+import { gridIcon, reelsIcon, video } from './icons';
 import type { WeddingConfig } from '@/types/wedding';
 
 interface Props {
   config: WeddingConfig;
 }
 const { config } = Astro.props;
-const { gallery } = config;
+const { gallery, coupleStory } = config;
+
+// 동영상 탭 썸네일 — 포스터 이미지를 지정했으면 그 thumb, 아니면 영상 프레임(#t)으로 표시(피드 영상과 동일 내용).
+const reelImg = coupleStory.filmPoster?.replace('/gallery/', '/gallery/thumb/');
+
+// 3×3 기본 틀 — 게시물이 적으면 흰 공백 셀로 채워 그리드 모양·높이를 유지(사진·영상 탭 동일).
+const blankCount = (count: number) => Math.max(9, Math.ceil(count / 3) * 3) - count;
 ---
 
-<div class="ig-gridtabs">
-  <button type="button" class="is-active" aria-label="게시물"><Fragment set:html={gridIcon} /></button>
-  <button type="button" aria-label="릴스"><Fragment set:html={reelsIcon} /></button>
-  <button type="button" aria-label="태그됨"><Fragment set:html={tagIcon} /></button>
-</div>
+{/* 사람(태그됨) 탭 제거. 격자=사진, 동영상=영상 썸네일 게시물(#post-film 로 이동) 탭 전환(IgApp 위임 스크립트). */}
+<div class="ig-tabsec" data-gridsection>
+  <div class="ig-gridtabs">
+    <button type="button" class="is-active" data-grid-tab="grid" aria-label="게시물"><Fragment set:html={gridIcon} /></button>
+    <button type="button" data-grid-tab="reels" aria-label="동영상"><Fragment set:html={reelsIcon} /></button>
+  </div>
 
-<div class="ig-grid">
-  {gallery.images.map((img, i) => (
-    <button type="button" data-gallery-item data-index={i} aria-label={`사진 ${i + 1} 크게 보기`}>
-      {/* 그리드는 가벼운 썸네일(thumb/), 라이트박스는 원본(img.src) */}
-      <img src={img.src.replace('/gallery/', '/gallery/thumb/')} alt={img.alt} loading="lazy" decoding="async" width="300" height="300" />
-    </button>
-  ))}
+  <div class="ig-grid" data-grid-view="grid">
+    {gallery.images.map((img, i) => (
+      <button type="button" data-gallery-item data-index={i} aria-label={`사진 ${i + 1} 크게 보기`}>
+        {/* 그리드는 가벼운 썸네일(thumb/), 라이트박스는 원본(img.src) */}
+        <img src={img.src.replace('/gallery/', '/gallery/thumb/')} alt={img.alt} loading="lazy" decoding="async" width="300" height="300" />
+      </button>
+    ))}
+    {Array.from({ length: blankCount(gallery.images.length) }).map(() => <div class="ig-cell-blank" aria-hidden="true" />)}
+  </div>
+
+  {coupleStory.filmSrc ? (
+    <div class="ig-grid" data-grid-view="reels" hidden>
+      <a class="ig-reel-thumb" href="#post-film" data-target="#post-film" aria-label="우리의 순간 영상 보기">
+        {reelImg
+          ? <img src={reelImg} alt="우리의 순간 영상" loading="lazy" decoding="async" width="300" height="300" />
+          : <video src={`${coupleStory.filmSrc}#t=0.5`} muted playsinline preload="metadata"></video>}
+        <span class="ig-reel-badge"><Fragment set:html={reelsIcon} /></span>
+      </a>
+      {Array.from({ length: blankCount(1) }).map(() => <div class="ig-cell-blank" aria-hidden="true" />)}
+    </div>
+  ) : (
+    <div class="ig-empty" data-grid-view="reels" hidden>
+      <span class="ig-empty__icon"><Fragment set:html={video} /></span>
+      <p class="ig-empty__title">게시물 없음</p>
+    </div>
+  )}
 </div>
 
 {/* 기존 풀스크린 뷰어 섬 재사용 — [data-gallery-item][data-index] 클릭 위임 */}

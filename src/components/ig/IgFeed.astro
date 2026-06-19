@@ -11,7 +11,7 @@ interface Props {
 }
 const { config, handle } = Astro.props;
 const { cover, greeting, coupleStory, location: loc, calendar, accounts, notices } = config;
-const avatar = cover.heroImage;
+const avatar = cover.profileImage ?? cover.heroImage;
 const { directions } = loc;
 
 // 달력(예식정보 게시물)
@@ -28,40 +28,30 @@ const hasNotices = notices.declineWreath || notices.items.length > 0;
 ---
 
 <div class="ig-feed">
-  {/* 1) 결혼 발표 — 히어로 + 인사말 */}
-  <IgPost postId="post-announcement" handle={handle} avatar={avatar} locationTag={cover.venueShort} likes={312} timeAgo="오늘" serifCaption>
-    <img slot="media" src={cover.heroImage} alt={`${cover.groomName} ${cover.brideName} 결혼합니다`} width="400" height="500" />
-    <Fragment slot="caption">
-      <span class="ig-caption__name">{handle}</span>
-      <span class="ig-caption__text ig-clamp">{greeting.message}</span>
-      <button class="ig-more-btn" type="button" data-more>… 더 보기</button>
-    </Fragment>
-  </IgPost>
-
-  {/* 2) 우리 이야기 — 타임라인 캐러셀 */}
-  {coupleStory.enabled && coupleStory.timeline && coupleStory.timeline.length > 0 && (
-    <IgPost postId="post-story" handle={handle} avatar={avatar} locationTag="우리 이야기" likes={208} timeAgo="어제">
-      <Fragment slot="media">
-        <div class="ig-carousel">
-          {coupleStory.timeline.map((t) => (
-            <div class="ig-slide">
-              <span class="ig-slide__date">{t.date}</span>
-              <span class="ig-slide__title">{t.title}</span>
-              {t.body && <p class="ig-slide__body">{t.body}</p>}
-            </div>
-          ))}
-        </div>
-        <div class="ig-dots" aria-hidden="true">{coupleStory.timeline.map(() => <i />)}</div>
-      </Fragment>
+  {/* 0) 우리의 순간 — 짧은 영상(자체 호스팅 mp4) + 인사말. 하이라이트 '우리의순간'이 여기로 연결됩니다. */}
+  {coupleStory.filmSrc && (
+    <IgPost postId="post-film" handle={handle} avatar={avatar} locationTag="우리의 순간 🎬" likes={276} timeAgo="오늘" serifCaption>
+      <video
+        slot="media"
+        src={coupleStory.filmSrc}
+        poster={coupleStory.filmPoster}
+        muted
+        autoplay
+        loop
+        playsinline
+        controls
+        preload="metadata"
+      ></video>
       <Fragment slot="caption">
         <span class="ig-caption__name">{handle}</span>
-        <span class="ig-caption__text">처음 만난 그날부터 오늘까지, 우리의 이야기 🤍</span>
+        <span class="ig-caption__text ig-clamp">{greeting.message}</span>
+        <button class="ig-more-btn" type="button" data-more>… 더 보기</button>
       </Fragment>
     </IgPost>
   )}
 
-  {/* 3) 오시는 길 — 지도 + 길찾기 */}
-  <IgPost postId="post-location" handle={handle} avatar={avatar} locationTag={loc.venueName} likes={95} timeAgo="2일 전">
+  {/* 1) 오시는 길 — 지도 + 길찾기 */}
+  <IgPost postId="post-location" handle={handle} avatar={avatar} locationTag="오시는 길" likes={95} timeAgo="2일 전">
     {loc.mapEmbedSrc ? (
       <iframe slot="media" src={loc.mapEmbedSrc} title={`${loc.venueName} 지도`} loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen />
     ) : (

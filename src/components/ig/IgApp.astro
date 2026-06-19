@@ -27,8 +27,7 @@ const HANDLE = 'mingu_mijin';
 
 // 게시물 수 = 실제 렌더되는 게시물 개수(피드와 동일 게이트)
 const posts = [
-  'announcement',
-  c.coupleStory.enabled && 'story',
+  c.coupleStory.filmSrc && 'film',
   'location',
   c.calendar.enabled && 'calendar',
   c.accounts.enabled && 'accounts',
@@ -38,7 +37,15 @@ const postCount = posts.length;
 ---
 
 <div class="ig">
-  <IgTopBar handle={HANDLE} />
+  <IgTopBar
+    handle={HANDLE}
+    share={{
+      title: c.share.ogTitle,
+      description: c.share.ogDescription,
+      imageUrl: c.share.ogImage,
+      linkUrl: c.share.siteUrl,
+    }}
+  />
   <IgProfileHeader config={c} handle={HANDLE} postCount={postCount} />
   <IgHighlights config={c} />
   <IgPhotoGrid config={c} />
@@ -46,7 +53,7 @@ const postCount = posts.length;
 </div>
 
 <IgBottomNav
-  avatar={c.cover.heroImage}
+  avatar={c.cover.profileImage ?? c.cover.heroImage}
   share={{
     title: c.share.ogTitle,
     description: c.share.ogDescription,
@@ -71,6 +78,56 @@ const postCount = posts.length;
 
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // ── 좋아요·저장: localStorage 영속 + 재방문 복원 ──
+  const LIKE_KEY = 'ig-liked';
+  const SAVE_KEY = 'ig-saved';
+  function lsSet(key: string): Set<string> {
+    try { return new Set(JSON.parse(localStorage.getItem(key) || '[]')); } catch { return new Set(); }
+  }
+  function lsSave(key: string, set: Set<string>): void {
+    try { localStorage.setItem(key, JSON.stringify([...set])); } catch { /* 프라이버시 모드 등 */ }
+  }
+  // 저장(북마크) 복원
+  {
+    const saved = lsSet(SAVE_KEY);
+    document.querySelectorAll<HTMLElement>('[data-save]').forEach((el) => {
+      if (el.dataset.save && saved.has(el.dataset.save)) el.classList.add('saved');
+    });
+  }
+  // 좋아요 복원(좋아요한 게시물은 채워진 하트 + 카운트 +1)
+  {
+    const liked = lsSet(LIKE_KEY);
+    document.querySelectorAll<HTMLElement>('.ig-post').forEach((post) => {
+      if (!post.id || !liked.has(post.id)) return;
+      const btn = post.querySelector<HTMLElement>('[data-like]');
+      if (!btn || btn.classList.contains('liked')) return;
+      btn.classList.add('liked');
+      const countEl = post.querySelector<HTMLElement>('[data-like-count]');
+      if (countEl) {
+        const n = parseInt(countEl.textContent || '0', 10) || 0;
+        countEl.textContent = String(n + 1);
+      }
+    });
+  }
+
+  // ── 댓글: 가벼운 이모지 버스트(아이콘에서 이모지가 떠오름) ──
+  const BURST_EMOJI = ['🤍', '🌸', '🎉', '💍', '🥹', '💐'];
+  function commentBurst(btn: HTMLElement) {
+    if (prefersReduced) return;
+    const r = btn.getBoundingClientRect();
+    for (let i = 0; i < 5; i++) {
+      const s = document.createElement('span');
+      s.className = 'ig-burst';
+      s.textContent = BURST_EMOJI[Math.floor(Math.random() * BURST_EMOJI.length)];
+      s.style.left = `${r.left + r.width / 2}px`;
+      s.style.top = `${r.top}px`;
+      s.style.setProperty('--dx', `${(Math.random() - 0.5) * 64}px`);
+      s.style.setProperty('--d', `${i * 40}ms`);
+      s.addEventListener('animationend', () => s.remove());
+      document.body.appendChild(s);
+    }
+  }
+
   // ── 하이라이트/네비 부드러운 스크롤 + 펄스(실제 #앵커라 JS 꺼져도 동작) ──
   function scrollToTarget(sel: string) {
     const target = document.querySelector<HTMLElement>(sel);
@@ -87,20 +144,76 @@ const postCount = posts.length;
   document.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
 
-    // 메시지 보내기 팝오버: 바깥을 누르면 닫기(summary 토글은 네이티브)
-    document.querySelectorAll<HTMLDetailsElement>('details.ig-msg[open]').forEach((d) => {
+    // 팝오버/드롭다운(메시지·상단 메뉴): 바깥을 누르면 닫기(summary 토글은 네이티브)
+    document.querySelectorAll<HTMLDetailsElement>('details[data-autoclose][open]').forEach((d) => {
       if (!d.contains(t)) d.open = false;
     });
 
-    // 좋아요 토글
+    // 좋아요 토글(+ localStorage 영속)
     const like = t.closest<HTMLElement>('[data-like]');
     if (like) {
-      const post = like.closest('.ig-post');
+      const post = like.closest<HTMLElement>('.ig-post');
       const liked = like.classList.toggle('liked');
       const countEl = post?.querySelector<HTMLElement>('[data-like-count]');
       if (countEl) {
         const n = parseInt(countEl.textContent || '0', 10) || 0;
         countEl.textContent = String(liked ? n + 1 : Math.max(0, n - 1));
+      }
+      if (post?.id) {
+        const set = lsSet(LIKE_KEY);
+        if (liked) set.add(post.id); else set.delete(post.id);
+        lsSave(LIKE_KEY, set);
+      }
+      return;
+    }
+
+    // 댓글 — 가벼운 이모지 버스트
+    const commentBtn = t.closest<HTMLElement>('[data-comment-burst]');
+    if (commentBtn) {
+      commentBurst(commentBtn);
+      return;
+    }
+
+    // 공유(종이비행기) — 날아가는 작은 모션(공유 자체는 상단 ⋮·하단 탭바에서)
+    const flyBtn = t.closest<HTMLElement>('[data-share-fly]');
+    if (flyBtn) {
+      const icon = flyBtn.querySelector('svg');
+      if (icon && !prefersReduced) {
+        icon.classList.remove('fly');
+        void icon.getBoundingClientRect(); // reflow 로 재시작
+        icon.classList.add('fly');
+      }
+      return;
+    }
+
+    // 저장(북마크) — 토글 + localStorage 영속
+    const saveBtn = t.closest<HTMLElement>('[data-save]');
+    if (saveBtn) {
+      const id = saveBtn.dataset.save || '';
+      const on = saveBtn.classList.toggle('saved');
+      const set = lsSet(SAVE_KEY);
+      if (on) set.add(id); else set.delete(id);
+      lsSave(SAVE_KEY, set);
+      if (on && !prefersReduced) {
+        saveBtn.classList.remove('save-pop');
+        void saveBtn.offsetWidth;
+        saveBtn.classList.add('save-pop');
+      }
+      // 토스트 없이 아이콘 채움+바운스로만 피드백(실제 인스타 북마크처럼)
+      return;
+    }
+
+    // 그리드 탭 전환(격자 사진 ↔ 동영상 '게시물 없음' 빈 상태)
+    const gridTab = t.closest<HTMLElement>('[data-grid-tab]');
+    if (gridTab) {
+      const section = gridTab.closest<HTMLElement>('[data-gridsection]');
+      const which = gridTab.dataset.gridTab;
+      if (section && which) {
+        section.querySelectorAll<HTMLElement>('[data-grid-tab]').forEach((b) =>
+          b.classList.toggle('is-active', b === gridTab));
+        section.querySelectorAll<HTMLElement>('[data-grid-view]').forEach((v) => {
+          v.hidden = v.dataset.gridView !== which;
+        });
       }
       return;
     }
@@ -121,10 +234,11 @@ const postCount = posts.length;
       return;
     }
 
-    // 카카오톡 공유(하단 탭바) — SDK 미설정/실패 시 링크복사로 폴백
+    // 카카오톡 공유(하단 탭바·상단 ⋮ 메뉴 공용) — SDK 미설정/실패 시 링크복사로 폴백
     const shareBtn = t.closest<HTMLElement>('[data-share-kakao]');
     if (shareBtn) {
       e.preventDefault();
+      shareBtn.closest('details[data-autoclose]')?.removeAttribute('open');
       const d = shareBtn.dataset;
       const link = d.link || '';
       shareToKakao({
@@ -142,10 +256,11 @@ const postCount = posts.length;
       return;
     }
 
-    // 링크 복사(하단 탭바)
+    // 링크 복사(하단 탭바·상단 ⋮ 메뉴 공용)
     const copyBtn = t.closest<HTMLElement>('[data-copy-link]');
     if (copyBtn) {
       e.preventDefault();
+      copyBtn.closest('details[data-autoclose]')?.removeAttribute('open');
       copyText(copyBtn.dataset.link || '').then((copied) =>
         toast(copied ? '청첩장 링크가 복사되었습니다' : '복사에 실패했어요'),
       );
@@ -181,5 +296,25 @@ const postCount = posts.length;
       void post.offsetWidth;
       post.classList.add('liked-burst');
     });
+  });
+
+  // ── 캐러셀(우리 이야기): 스크롤 위치에 맞춰 하단 점 인디케이터 갱신 ──
+  document.querySelectorAll<HTMLElement>('.ig-carousel').forEach((carousel) => {
+    const wrap = carousel.closest<HTMLElement>('.ig-post__media')?.querySelector<HTMLElement>('.ig-dots');
+    const dots = wrap ? Array.from(wrap.querySelectorAll<HTMLElement>('i')) : [];
+    if (!wrap || dots.length === 0) return;
+    wrap.classList.add('is-live');
+    const update = () => {
+      const w = carousel.clientWidth || 1;
+      const idx = Math.min(dots.length - 1, Math.max(0, Math.round(carousel.scrollLeft / w)));
+      dots.forEach((d, i) => d.classList.toggle('is-active', i === idx));
+    };
+    update();
+    let ticking = false;
+    carousel.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { update(); ticking = false; });
+    }, { passive: true });
   });
 </script>
