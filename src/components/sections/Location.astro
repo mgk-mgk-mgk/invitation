@@ -97,7 +97,7 @@ const { directions } = loc;
   .loc__pagelink :global(.btn--page:hover) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(44, 39, 34, 0.26); }
   .loc__pagelink :global(.btn--page:active) { transform: translateY(0); filter: brightness(0.97); }
 
-  /* 지도 앱 버튼 — 3열 균등 브랜드 카드(아이콘 + 라벨) */
+  /* 지도 앱 버튼 — 3열 균등 카드(아이콘 + 라벨), 아이보리/골드 무드에 맞춘 저채도 톤 */
   .loc__links {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -106,13 +106,15 @@ const { directions } = loc;
   }
   .loc__links :global(.btn--map) {
     flex-direction: column;
-    gap: 0.35rem;
-    border: none;
+    gap: 0.4rem;
+    border: 1px solid var(--c-line);
     border-radius: var(--radius);
     padding: 0.85rem 0.4rem;
     font-size: 0.83rem;
     font-weight: 600;
-    box-shadow: 0 2px 7px rgba(44, 39, 34, 0.1);
+    background: var(--c-surface);
+    color: var(--c-ink);
+    box-shadow: 0 1px 4px rgba(44, 39, 34, 0.05);
     transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
   }
   .loc__links :global(.btn--map)::before {
@@ -122,11 +124,12 @@ const { directions } = loc;
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z'/%3E%3C/svg%3E") center/contain no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z'/%3E%3C/svg%3E") center/contain no-repeat;
   }
-  .loc__links :global(.btn--map:hover) { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(44, 39, 34, 0.16); }
-  .loc__links :global(.btn--map:active) { transform: translateY(0); filter: brightness(0.97); }
-  .loc__links :global(.btn--naver) { background: #03c75a; color: #fff; }
-  .loc__links :global(.btn--kakao) { background: #fee500; color: #3a1d1d; }
-  .loc__links :global(.btn--tmap) { background: #2b2f77; color: #fff; }
+  .loc__links :global(.btn--map:hover) { transform: translateY(-2px); box-shadow: 0 5px 12px rgba(44, 39, 34, 0.1); }
+  .loc__links :global(.btn--map:active) { transform: translateY(0); filter: brightness(0.98); }
+  /* 브랜드 색을 그대로 쓰지 않고, 채도를 낮춘 톤(연한 배경 + 톤 다운 텍스트·아이콘)으로 식별성만 유지 */
+  .loc__links :global(.btn--naver) { background: #eef3ec; border-color: #d3e0cd; color: #4f7a5b; }
+  .loc__links :global(.btn--kakao) { background: #f7efda; border-color: #e7d6a9; color: #997a2c; }
+  .loc__links :global(.btn--tmap)  { background: #eef0f5; border-color: #d2d7e2; color: #5b6182; }
 
   @media (prefers-reduced-motion: reduce) {
     .loc__pagelink :global(.btn--page),
