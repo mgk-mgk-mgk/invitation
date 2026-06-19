@@ -87,6 +87,11 @@ const postCount = posts.length;
   document.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
 
+    // 메시지 보내기 팝오버: 바깥을 누르면 닫기(summary 토글은 네이티브)
+    document.querySelectorAll<HTMLDetailsElement>('details.ig-msg[open]').forEach((d) => {
+      if (!d.contains(t)) d.open = false;
+    });
+
     // 좋아요 토글
     const like = t.closest<HTMLElement>('[data-like]');
     if (like) {

@@ -13,6 +13,12 @@ const { cover, gallery, greeting, accounts, location } = config;
 
 const tagline = greeting.message.split('\n')[0];
 const dateLine = dateHero(cover.datetimeISO, cover.dateHeroStyle ?? 'YYYY.MM.DD DAY');
+
+// 메시지 보내기 — 누르면 신랑/신부 중 선택해 실제 문자(SMS) 앱이 열립니다. 번호 없는 쪽은 생략.
+const smsHref = (p?: string) => (p ? `sms:${p.replace(/[^0-9+]/g, '')}` : null);
+const groomSms = smsHref(greeting.groom.person.phone);
+const brideSms = smsHref(greeting.bride.person.phone);
+const canMessage = Boolean(groomSms || brideSms);
 ---
 
 <section class="ig-profile">
@@ -37,6 +43,16 @@ const dateLine = dateHero(cover.datetimeISO, cover.dateHeroStyle ?? 'YYYY.MM.DD 
 
 <div class="ig-actions">
   <button class="ig-btn ig-btn--primary is-following" type="button" data-follow>팔로잉</button>
-  {accounts.enabled && <a class="ig-btn ig-btn--secondary" href="#post-accounts" data-target="#post-accounts">메시지</a>}
+  {canMessage ? (
+    <details class="ig-msg">
+      <summary class="ig-btn ig-btn--secondary">메시지 보내기</summary>
+      <div class="ig-msg__menu" role="menu">
+        {groomSms && <a role="menuitem" href={groomSms}>신랑에게 문자</a>}
+        {brideSms && <a role="menuitem" href={brideSms}>신부에게 문자</a>}
+      </div>
+    </details>
+  ) : (
+    accounts.enabled && <a class="ig-btn ig-btn--secondary" href="#post-accounts" data-target="#post-accounts">메시지</a>
+  )}
   <a class="ig-btn ig-btn--secondary ig-btn--icon" href="#post-location" data-target="#post-location" aria-label={`${location.venueName} 위치`}>▾</a>
 </div>

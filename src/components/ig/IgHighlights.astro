@@ -14,11 +14,12 @@ const thumb = (i: number) => {
 };
 
 // 존재하는 섹션만 바로가기로(실제 #post-id 앵커 → JS 꺼져도 동작)
+// 순서는 아래 피드 게시물 순서와 동일하게: 우리이야기 → 오시는길 → 예식정보 → 마음전하기 → 공지
 const items = [
-  calendar.enabled && { id: 'post-calendar', label: '예식정보', cover: thumb(0) },
-  { id: 'post-location', label: '오시는길', cover: thumb(5) },
-  accounts.enabled && { id: 'post-accounts', label: '마음전하기', cover: thumb(9) },
   coupleStory.enabled && { id: 'post-story', label: '우리이야기', cover: thumb(12) },
+  { id: 'post-location', label: '오시는길', cover: thumb(5) },
+  calendar.enabled && { id: 'post-calendar', label: '예식정보', cover: thumb(0) },
+  accounts.enabled && { id: 'post-accounts', label: '마음전하기', cover: thumb(9) },
   (notices.declineWreath || notices.items.length > 0) && { id: 'post-notices', label: '공지', cover: thumb(15) },
 ].filter(Boolean) as { id: string; label: string; cover: string }[];
 ---
