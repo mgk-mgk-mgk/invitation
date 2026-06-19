@@ -1,0 +1,146 @@
+---
+// 인스타그램 UI 본문 오케스트레이터 (캐주얼판의 Invitation.astro 대응).
+// 상단바·프로필·하이라이트·그리드·피드·하단탭바를 조립하고, 떠 있는 섬(ShareBar/BgmToggle)을 띄우며,
+// 단 하나의 위임 스크립트로 좋아요/더블탭/하이라이트 스크롤/팔로잉/D-day를 처리합니다.
+import '@/styles/instagram.css';
+import IgTopBar from './IgTopBar.astro';
+import IgProfileHeader from './IgProfileHeader.astro';
+import IgHighlights from './IgHighlights.astro';
+import IgPhotoGrid from './IgPhotoGrid.astro';
+import IgFeed from './IgFeed.astro';
+import IgBottomNav from './IgBottomNav.astro';
+
+import BgmToggle from '@/components/ui/BgmToggle.astro';
+import ShareBar from '@/components/islands/ShareBar.tsx';
+
+import defaultConfig from '@/lib/config.casual';
+import type { WeddingConfig } from '@/types/wedding';
+
+interface Props {
+  config?: WeddingConfig;
+}
+const { config = defaultConfig } = Astro.props as { config?: typeof defaultConfig };
+const c = config;
+
+// 신랑·신부 계정 핸들(한글 이름은 슬러그화가 안 되므로 고정 핸들 사용)
+const HANDLE = 'mingu_mijin';
+
+// 게시물 수 = 실제 렌더되는 게시물 개수(피드와 동일 게이트)
+const posts = [
+  'announcement',
+  c.coupleStory.enabled && 'story',
+  'location',
+  c.calendar.enabled && 'calendar',
+  c.accounts.enabled && 'accounts',
+  (c.notices.declineWreath || c.notices.items.length > 0) && 'notices',
+].filter(Boolean);
+const postCount = posts.length;
+---
+
+<div class="ig">
+  <IgTopBar handle={HANDLE} />
+  <IgProfileHeader config={c} handle={HANDLE} postCount={postCount} />
+  <IgHighlights config={c} />
+  <IgPhotoGrid config={c} />
+  <IgFeed config={c} handle={HANDLE} />
+</div>
+
+<IgBottomNav avatar={c.cover.heroImage} accountsHref={c.accounts.enabled ? '#post-accounts' : undefined} />
+
+{/* 떠 있는 컨트롤 — 기존 섬 그대로(스타일은 instagram.css 에서 하단탭바 위로 보정) */}
+{c.bgm.enabled && <BgmToggle src={c.bgm.src} />}
+<ShareBar
+  client:idle
+  title={c.share.ogTitle}
+  description={c.share.ogDescription}
+  imageUrl={c.share.ogImage}
+  linkUrl={c.share.siteUrl}
+/>
+
+<script>
+  import { dDayLabel } from '@/lib/datetime';
+
+  // ── D-day: 빌드 시점 고정 방지 위해 클라이언트에서 계산(Calendar.astro 패턴) ──
+  document.querySelectorAll<HTMLElement>('[data-dday]').forEach((el) => {
+    const t = el.dataset.target;
+    if (t) el.textContent = dDayLabel(t);
+  });
+
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ── 하이라이트/네비 부드러운 스크롤 + 펄스(실제 #앵커라 JS 꺼져도 동작) ──
+  function scrollToTarget(sel: string) {
+    const target = document.querySelector<HTMLElement>(sel);
+    if (!target) return;
+    target.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
+    if (!prefersReduced) {
+      target.classList.remove('pulse');
+      void target.offsetWidth; // reflow 로 애니메이션 재시작
+      target.classList.add('pulse');
+    }
+  }
+
+  // ── 단일 위임 클릭 핸들러 ──
+  document.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+
+    // 좋아요 토글
+    const like = t.closest<HTMLElement>('[data-like]');
+    if (like) {
+      const post = like.closest('.ig-post');
+      const liked = like.classList.toggle('liked');
+      const countEl = post?.querySelector<HTMLElement>('[data-like-count]');
+      if (countEl) {
+        const n = parseInt(countEl.textContent || '0', 10) || 0;
+        countEl.textContent = String(liked ? n + 1 : Math.max(0, n - 1));
+      }
+      return;
+    }
+
+    // 캡션 더 보기
+    const more = t.closest<HTMLElement>('[data-more]');
+    if (more) {
+      more.closest('.ig-caption')?.querySelector('.ig-clamp')?.classList.add('is-open');
+      more.classList.add('is-hidden');
+      return;
+    }
+
+    // 팔로잉 토글
+    const follow = t.closest<HTMLElement>('[data-follow]');
+    if (follow) {
+      const on = follow.classList.toggle('is-following');
+      follow.textContent = on ? '팔로잉' : '팔로우';
+      return;
+    }
+
+    // 맨 위로
+    const nav = t.closest<HTMLElement>('[data-nav="top"]');
+    if (nav) {
+      window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+      return;
+    }
+
+    // 섹션 바로가기(하이라이트/메시지/위치/＋)
+    const jump = t.closest<HTMLElement>('[data-target]');
+    if (jump) {
+      const sel = jump.dataset.target;
+      if (sel && sel.startsWith('#')) {
+        e.preventDefault();
+        scrollToTarget(sel);
+      }
+    }
+  });
+
+  // ── 사진 더블탭 = 좋아요 + 하트 팝 ──
+  document.querySelectorAll<HTMLElement>('[data-ig-media]').forEach((media) => {
+    media.addEventListener('dblclick', () => {
+      const post = media.closest<HTMLElement>('.ig-post');
+      if (!post) return;
+      const like = post.querySelector<HTMLElement>('[data-like]');
+      if (like && !like.classList.contains('liked')) like.click();
+      post.classList.remove('liked-burst');
+      void post.offsetWidth;
+      post.classList.add('liked-burst');
+    });
+  });
+</script>

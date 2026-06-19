@@ -1,0 +1,29 @@
+---
+import Lightbox from '@/components/islands/Lightbox.tsx';
+import { gridIcon, reelsIcon, tagIcon } from './icons';
+import type { WeddingConfig } from '@/types/wedding';
+
+interface Props {
+  config: WeddingConfig;
+}
+const { config } = Astro.props;
+const { gallery } = config;
+---
+
+<div class="ig-gridtabs">
+  <button type="button" class="is-active" aria-label="게시물"><Fragment set:html={gridIcon} /></button>
+  <button type="button" aria-label="릴스"><Fragment set:html={reelsIcon} /></button>
+  <button type="button" aria-label="태그됨"><Fragment set:html={tagIcon} /></button>
+</div>
+
+<div class="ig-grid">
+  {gallery.images.map((img, i) => (
+    <button type="button" data-gallery-item data-index={i} aria-label={`사진 ${i + 1} 크게 보기`}>
+      {/* 그리드는 가벼운 썸네일(thumb/), 라이트박스는 원본(img.src) */}
+      <img src={img.src.replace('/gallery/', '/gallery/thumb/')} alt={img.alt} loading="lazy" decoding="async" width="300" height="300" />
+    </button>
+  ))}
+</div>
+
+{/* 기존 풀스크린 뷰어 섬 재사용 — [data-gallery-item][data-index] 클릭 위임 */}
+<Lightbox client:idle images={gallery.images} />

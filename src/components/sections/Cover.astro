@@ -1,7 +1,8 @@
 ---
-import config from '@/lib/config';
+import defaultConfig from '@/lib/config';
 import { dateHero, dateKoFull } from '@/lib/datetime';
 
+const { config = defaultConfig } = Astro.props as { config?: typeof defaultConfig };
 const { cover } = config;
 const hero = dateHero(cover.datetimeISO, cover.dateHeroStyle);
 const full = dateKoFull(cover.datetimeISO);

@@ -1,8 +1,9 @@
 ---
 import Section from '@/components/ui/Section.astro';
-import config from '@/lib/config';
+import defaultConfig from '@/lib/config';
 import type { FamilySide } from '@/types/wedding';
 
+const { config = defaultConfig } = Astro.props as { config?: typeof defaultConfig };
 const { greeting } = config;
 
 /** "父 ○○○ · 母 ○○○ 의 장남 ○○○" 계보 줄. 故/생략 처리 포함. */

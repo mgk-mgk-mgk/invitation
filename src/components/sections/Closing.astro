@@ -1,6 +1,7 @@
 ---
-import config from '@/lib/config';
+import defaultConfig from '@/lib/config';
 
+const { config = defaultConfig } = Astro.props as { config?: typeof defaultConfig };
 const { share, cover } = config;
 ---
 

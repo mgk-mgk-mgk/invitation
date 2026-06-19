@@ -129,13 +129,6 @@ const configSchema = z.object({
   }),
 });
 
-const parsed = configSchema.safeParse(wedding);
-if (!parsed.success) {
-  // 빌드 콘솔에 어떤 필드가 잘못됐는지 그대로 출력하고 빌드를 멈춥니다.
-  console.error('\n❌ wedding.config.ts 검증 실패:\n', parsed.error.format());
-  throw new Error('wedding.config.ts 검증 실패 — 위 항목을 고쳐주세요.');
-}
-
 // ── base path / 절대 URL 보정 ──────────────────────────────────────────────
 // GitHub Pages 프로젝트 repo는 https://<유저>.github.io/<repo>/ 하위에 서빙됩니다.
 // 그래서 로컬 에셋(/images, /bgm.mp3)에는 base 를, 공유용 OG 절대 URL 에는 origin+base 를
@@ -157,13 +150,31 @@ const toAbsolute = (urlOrPath: string): string => {
   return SITE + (path.startsWith('/') ? path : '/' + path);
 };
 
-const data = parsed.data as WeddingConfig;
-data.cover.heroImage = withBase(data.cover.heroImage);
-data.bgm.src = withBase(data.bgm.src);
-data.location.staticMapImage = withBase(data.location.staticMapImage);
-data.gallery.images = data.gallery.images.map((img) => ({ ...img, src: withBase(img.src) }));
-data.share.siteUrl = SITE ?? data.share.siteUrl;
-data.share.ogImage = toAbsolute(data.share.ogImage);
+/**
+ * 빌드타임 검증 + base/절대 URL 보정을 한 번에 수행하는 팩토리.
+ * 격식판·캐주얼판 등 여러 config 가 같은 검증·보정 파이프라인을 타도록 분리했습니다.
+ * 필수값(날짜·예식장·og:image 등)이 빠지면 "결혼식"이 아니라 "빌드"가 실패합니다.
+ * @param raw        wedding.config.ts 형태의 원본 객체
+ * @param routeBase  이 버전이 서빙되는 하위 경로(예: '/casual'). 공유 siteUrl/og:url 에 반영.
+ */
+export function buildConfig(raw: unknown, routeBase = ''): WeddingConfig {
+  const parsed = configSchema.safeParse(raw);
+  if (!parsed.success) {
+    // 빌드 콘솔에 어떤 필드가 잘못됐는지 그대로 출력하고 빌드를 멈춥니다.
+    console.error('\n❌ wedding.config 검증 실패:\n', parsed.error.format());
+    throw new Error('wedding.config 검증 실패 — 위 항목을 고쳐주세요.');
+  }
 
-export const config: WeddingConfig = data;
+  const data = parsed.data as WeddingConfig;
+  data.cover.heroImage = withBase(data.cover.heroImage);
+  data.bgm.src = withBase(data.bgm.src);
+  data.location.staticMapImage = withBase(data.location.staticMapImage);
+  data.gallery.images = data.gallery.images.map((img) => ({ ...img, src: withBase(img.src) }));
+  data.share.siteUrl = SITE ? SITE + routeBase : data.share.siteUrl;
+  data.share.ogImage = toAbsolute(data.share.ogImage);
+  return data;
+}
+
+// 격식판(기본) — '/' 경로. 기존 동작 그대로.
+export const config: WeddingConfig = buildConfig(wedding);
 export default config;

@@ -1,7 +1,8 @@
 ---
 import '@/styles/global.css';
-import config from '@/lib/config';
+import defaultConfig from '@/lib/config';
 
+const { config = defaultConfig } = Astro.props as { config?: typeof defaultConfig };
 const { share, meta, cover } = config;
 const pageTitle = share.ogTitle;
 // 프로젝트 repo 배포 시 '/<repo>'. trailing slash 유무에 무관하게 정규화.

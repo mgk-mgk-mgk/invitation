@@ -1,0 +1,33 @@
+---
+import type { WeddingConfig } from '@/types/wedding';
+
+interface Props {
+  config: WeddingConfig;
+}
+const { config } = Astro.props;
+const { gallery, calendar, accounts, coupleStory, notices } = config;
+
+// 그리드 썸네일을 하이라이트 커버로 재사용
+const thumb = (i: number) => {
+  const img = gallery.images[i % gallery.images.length];
+  return img.src.replace('/gallery/', '/gallery/thumb/');
+};
+
+// 존재하는 섹션만 바로가기로(실제 #post-id 앵커 → JS 꺼져도 동작)
+const items = [
+  calendar.enabled && { id: 'post-calendar', label: '예식정보', cover: thumb(0) },
+  { id: 'post-location', label: '오시는길', cover: thumb(5) },
+  accounts.enabled && { id: 'post-accounts', label: '마음전하기', cover: thumb(9) },
+  coupleStory.enabled && { id: 'post-story', label: '우리이야기', cover: thumb(12) },
+  (notices.declineWreath || notices.items.length > 0) && { id: 'post-notices', label: '공지', cover: thumb(15) },
+].filter(Boolean) as { id: string; label: string; cover: string }[];
+---
+
+<nav class="ig-highlights" aria-label="섹션 바로가기">
+  {items.map((h) => (
+    <a class="ig-hl" href={`#${h.id}`} data-target={`#${h.id}`}>
+      <span class="ig-hl__ring"><img src={h.cover} alt="" loading="lazy" /></span>
+      <span>{h.label}</span>
+    </a>
+  ))}
+</nav>

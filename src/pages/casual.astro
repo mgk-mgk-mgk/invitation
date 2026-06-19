@@ -1,0 +1,11 @@
+---
+// 캐주얼판 — '/casual' 경로. 본문을 인스타그램 UI(IgApp)로 렌더합니다.
+// 데이터는 격식판과 같은 casualConfig, 레이아웃 head/OG/테마는 BaseLayout 공유. 격식판(index.astro)은 그대로.
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import IgApp from '@/components/ig/IgApp.astro';
+import config from '@/lib/config.casual';
+---
+
+<BaseLayout config={config}>
+  <IgApp config={config} />
+</BaseLayout>

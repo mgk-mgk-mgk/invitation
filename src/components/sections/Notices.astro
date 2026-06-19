@@ -1,7 +1,8 @@
 ---
 import Section from '@/components/ui/Section.astro';
-import config from '@/lib/config';
+import defaultConfig from '@/lib/config';
 
+const { config = defaultConfig } = Astro.props as { config?: typeof defaultConfig };
 const { notices } = config;
 const items = [...notices.items];
 if (notices.declineWreath && !items.some((i) => i.title.includes('화환'))) {

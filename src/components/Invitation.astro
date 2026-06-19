@@ -1,0 +1,59 @@
+---
+// 청첩장 본문(섹션 나열 + 떠 있는 컨트롤). config 를 prop 으로 받아 그립니다.
+// 격식판(index.astro)·캐주얼판(casual.astro)이 같은 본문을 공유하고 데이터만 갈아끼웁니다.
+import Cover from '@/components/sections/Cover.astro';
+import Greeting from '@/components/sections/Greeting.astro';
+import Gallery from '@/components/sections/Gallery.astro';
+import CoupleStory from '@/components/sections/CoupleStory.astro';
+import Calendar from '@/components/sections/Calendar.astro';
+import Location from '@/components/sections/Location.astro';
+import Contacts from '@/components/sections/Contacts.astro';
+import Accounts from '@/components/sections/Accounts.astro';
+import RsvpSection from '@/components/sections/RsvpSection.astro';
+import GuestbookSection from '@/components/sections/GuestbookSection.astro';
+import Notices from '@/components/sections/Notices.astro';
+import Closing from '@/components/sections/Closing.astro';
+
+import BgmToggle from '@/components/ui/BgmToggle.astro';
+import ShareBar from '@/components/islands/ShareBar.tsx';
+
+import defaultConfig from '@/lib/config';
+import type { WeddingConfig } from '@/types/wedding';
+
+interface Props {
+  config?: WeddingConfig;
+}
+const { config = defaultConfig } = Astro.props;
+const c = config;
+---
+
+<!-- 표지: reveal 미적용(첫 화면) -->
+<Cover config={c} />
+
+<Greeting config={c} />
+{c.gallery.enabled && <Gallery config={c} />}
+{c.coupleStory.enabled && <CoupleStory config={c} />}
+{c.calendar.enabled && <Calendar config={c} />}
+<Location config={c} />
+{c.contacts.enabled && <Contacts config={c} />}
+{c.accounts.enabled && <Accounts config={c} />}
+{c.rsvp.enabled && <RsvpSection config={c} />}
+{c.guestbook.enabled && <GuestbookSection config={c} />}
+{(c.notices.declineWreath || c.notices.items.length > 0) && <Notices config={c} />}
+<Closing config={c} />
+
+<!-- 떠 있는 컨트롤 -->
+{c.bgm.enabled && <BgmToggle src={c.bgm.src} />}
+<ShareBar
+  client:idle
+  title={c.share.ogTitle}
+  description={c.share.ogDescription}
+  imageUrl={c.share.ogImage}
+  linkUrl={c.share.siteUrl}
+/>
+
+<!-- 스크롤 reveal (공유 옵저버 1개) -->
+<script>
+  import { initReveal } from '@/scripts/reveal';
+  initReveal();
+</script>

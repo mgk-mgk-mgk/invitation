@@ -2,8 +2,9 @@
 import Section from '@/components/ui/Section.astro';
 import Accordion from '@/components/ui/Accordion.astro';
 import CopyButton from '@/components/ui/CopyButton.astro';
-import config from '@/lib/config';
+import defaultConfig from '@/lib/config';
 
+const { config = defaultConfig } = Astro.props as { config?: typeof defaultConfig };
 const { accounts } = config;
 const groom = accounts.list.filter((a) => a.side === 'groom');
 const bride = accounts.list.filter((a) => a.side === 'bride');

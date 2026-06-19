@@ -1,8 +1,9 @@
 ---
 import Section from '@/components/ui/Section.astro';
-import config from '@/lib/config';
+import defaultConfig from '@/lib/config';
 import { monthGrid, dateKoFull, dayOfWeekEn } from '@/lib/datetime';
 
+const { config = defaultConfig } = Astro.props as { config?: typeof defaultConfig };
 const { cover, calendar } = config;
 const g = monthGrid(cover.datetimeISO);
 const weekdays = ['일', '월', '화', '수', '목', '금', '토'];

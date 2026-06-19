@@ -1,55 +1,10 @@
 ---
+// 격식판 — '/' 경로. 본문/레이아웃은 공유하고 격식판 config 만 주입합니다.
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import Invitation from '@/components/Invitation.astro';
 import config from '@/lib/config';
-
-import Cover from '@/components/sections/Cover.astro';
-import Greeting from '@/components/sections/Greeting.astro';
-import Gallery from '@/components/sections/Gallery.astro';
-import CoupleStory from '@/components/sections/CoupleStory.astro';
-import Calendar from '@/components/sections/Calendar.astro';
-import Location from '@/components/sections/Location.astro';
-import Contacts from '@/components/sections/Contacts.astro';
-import Accounts from '@/components/sections/Accounts.astro';
-import RsvpSection from '@/components/sections/RsvpSection.astro';
-import GuestbookSection from '@/components/sections/GuestbookSection.astro';
-import Notices from '@/components/sections/Notices.astro';
-import Closing from '@/components/sections/Closing.astro';
-
-import BgmToggle from '@/components/ui/BgmToggle.astro';
-import ShareBar from '@/components/islands/ShareBar.tsx';
-
-const c = config;
 ---
 
-<BaseLayout>
-  <!-- 표지: reveal 미적용(첫 화면) -->
-  <Cover />
-
-  <Greeting />
-  {c.gallery.enabled && <Gallery />}
-  {c.coupleStory.enabled && <CoupleStory />}
-  {c.calendar.enabled && <Calendar />}
-  <Location />
-  {c.contacts.enabled && <Contacts />}
-  {c.accounts.enabled && <Accounts />}
-  {c.rsvp.enabled && <RsvpSection />}
-  {c.guestbook.enabled && <GuestbookSection />}
-  {(c.notices.declineWreath || c.notices.items.length > 0) && <Notices />}
-  <Closing />
-
-  <!-- 떠 있는 컨트롤 -->
-  {c.bgm.enabled && <BgmToggle src={c.bgm.src} />}
-  <ShareBar
-    client:idle
-    title={c.share.ogTitle}
-    description={c.share.ogDescription}
-    imageUrl={c.share.ogImage}
-    linkUrl={c.share.siteUrl}
-  />
-
-  <!-- 스크롤 reveal (공유 옵저버 1개) -->
-  <script>
-    import { initReveal } from '@/scripts/reveal';
-    initReveal();
-  </script>
+<BaseLayout config={config}>
+  <Invitation config={config} />
 </BaseLayout>

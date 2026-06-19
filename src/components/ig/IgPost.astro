@@ -1,0 +1,47 @@
+---
+import { more, heart, comment, share, bookmark, heartFill, verified } from './icons';
+
+interface Props {
+  postId: string;
+  handle: string;
+  avatar: string;
+  locationTag?: string;
+  likes: number;
+  timeAgo: string;
+  serifCaption?: boolean;
+}
+const { postId, handle, avatar, locationTag, likes, timeAgo, serifCaption = false } = Astro.props;
+---
+
+<article class="ig-post" id={postId}>
+  <header class="ig-post__head">
+    <span class="ig-ring"><img src={avatar} alt="" width="30" height="30" /></span>
+    <div class="ig-post__meta">
+      <b>{handle}<span class="ig-vrf" set:html={verified} /></b>
+      {locationTag && <small>{locationTag}</small>}
+    </div>
+    <button class="ig-post__more" type="button" aria-label="더보기"><Fragment set:html={more} /></button>
+  </header>
+
+  <div class="ig-post__media" data-ig-media>
+    <slot name="media" />
+    <span class="ig-heartpop" set:html={heartFill} />
+  </div>
+
+  <div class="ig-arow">
+    <button type="button" data-like aria-label="좋아요"><Fragment set:html={heart} /></button>
+    <button type="button" aria-label="댓글"><Fragment set:html={comment} /></button>
+    <button type="button" aria-label="공유"><Fragment set:html={share} /></button>
+    <button type="button" class="ig-arow__save" aria-label="저장"><Fragment set:html={bookmark} /></button>
+  </div>
+
+  <p class="ig-likes">좋아요 <span data-like-count>{likes}</span>개</p>
+
+  <div class:list={['ig-caption', serifCaption && 'ig-caption--serif']}>
+    <slot name="caption" />
+  </div>
+
+  <slot name="extra" />
+
+  <p class="ig-time">{timeAgo}</p>
+</article>

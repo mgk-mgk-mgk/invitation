@@ -1,0 +1,19 @@
+---
+import { home, search, plusSquare, heart } from './icons';
+
+interface Props {
+  avatar: string;
+  accountsHref?: string;
+}
+const { avatar, accountsHref } = Astro.props;
+---
+
+<nav class="ig-nav" aria-label="하단 메뉴">
+  <button type="button" data-nav="top" aria-label="홈"><Fragment set:html={home} /></button>
+  <button type="button" data-nav="top" aria-label="검색"><Fragment set:html={search} /></button>
+  {accountsHref
+    ? <a href={accountsHref} data-target={accountsHref} aria-label="추가"><Fragment set:html={plusSquare} /></a>
+    : <button type="button" data-nav="top" aria-label="추가"><Fragment set:html={plusSquare} /></button>}
+  <button type="button" data-nav="top" aria-label="좋아요"><Fragment set:html={heart} /></button>
+  <button type="button" class="is-active" data-nav="top" aria-label="프로필"><img class="ig-nav__me" src={avatar} alt="" width="26" height="26" /></button>
+</nav>

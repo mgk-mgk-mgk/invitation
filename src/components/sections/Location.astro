@@ -3,8 +3,9 @@ import Section from '@/components/ui/Section.astro';
 import Accordion from '@/components/ui/Accordion.astro';
 import CopyButton from '@/components/ui/CopyButton.astro';
 import DeepLinkButton from '@/components/ui/DeepLinkButton.astro';
-import config from '@/lib/config';
+import defaultConfig from '@/lib/config';
 
+const { config = defaultConfig } = Astro.props as { config?: typeof defaultConfig };
 const { location: loc } = config;
 const { directions } = loc;
 ---

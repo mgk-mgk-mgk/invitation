@@ -1,0 +1,187 @@
+---
+import IgPost from './IgPost.astro';
+import CopyButton from '@/components/ui/CopyButton.astro';
+import DeepLinkButton from '@/components/ui/DeepLinkButton.astro';
+import { dateKoFull, monthGrid } from '@/lib/datetime';
+import type { WeddingConfig } from '@/types/wedding';
+
+interface Props {
+  config: WeddingConfig;
+  handle: string;
+}
+const { config, handle } = Astro.props;
+const { cover, greeting, coupleStory, location: loc, calendar, accounts, notices } = config;
+const avatar = cover.heroImage;
+const { directions } = loc;
+
+// 달력(예식정보 게시물)
+const g = monthGrid(cover.datetimeISO);
+const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+const cells: (number | null)[] = [
+  ...Array.from({ length: g.firstDow }, () => null),
+  ...Array.from({ length: g.daysInMonth }, (_, i) => i + 1),
+];
+
+const groomAcct = accounts.list.filter((a) => a.side === 'groom');
+const brideAcct = accounts.list.filter((a) => a.side === 'bride');
+const hasNotices = notices.declineWreath || notices.items.length > 0;
+---
+
+<div class="ig-feed">
+  {/* 1) 결혼 발표 — 히어로 + 인사말 */}
+  <IgPost postId="post-announcement" handle={handle} avatar={avatar} locationTag={cover.venueShort} likes={312} timeAgo="오늘" serifCaption>
+    <img slot="media" src={cover.heroImage} alt={`${cover.groomName} ${cover.brideName} 결혼합니다`} width="400" height="500" />
+    <Fragment slot="caption">
+      <span class="ig-caption__name">{handle}</span>
+      <span class="ig-caption__text ig-clamp">{greeting.message}</span>
+      <button class="ig-more-btn" type="button" data-more>… 더 보기</button>
+    </Fragment>
+  </IgPost>
+
+  {/* 2) 우리 이야기 — 타임라인 캐러셀 */}
+  {coupleStory.enabled && coupleStory.timeline && coupleStory.timeline.length > 0 && (
+    <IgPost postId="post-story" handle={handle} avatar={avatar} locationTag="우리 이야기" likes={208} timeAgo="어제">
+      <Fragment slot="media">
+        <div class="ig-carousel">
+          {coupleStory.timeline.map((t) => (
+            <div class="ig-slide">
+              <span class="ig-slide__date">{t.date}</span>
+              <span class="ig-slide__title">{t.title}</span>
+              {t.body && <p class="ig-slide__body">{t.body}</p>}
+            </div>
+          ))}
+        </div>
+        <div class="ig-dots" aria-hidden="true">{coupleStory.timeline.map(() => <i />)}</div>
+      </Fragment>
+      <Fragment slot="caption">
+        <span class="ig-caption__name">{handle}</span>
+        <span class="ig-caption__text">처음 만난 그날부터 오늘까지, 우리의 이야기 🤍</span>
+      </Fragment>
+    </IgPost>
+  )}
+
+  {/* 3) 오시는 길 — 지도 + 길찾기 */}
+  <IgPost postId="post-location" handle={handle} avatar={avatar} locationTag={loc.venueName} likes={95} timeAgo="2일 전">
+    {loc.mapEmbedSrc ? (
+      <iframe slot="media" src={loc.mapEmbedSrc} title={`${loc.venueName} 지도`} loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen />
+    ) : (
+      <img slot="media" src={loc.staticMapImage} alt={`${loc.venueName} 위치`} width="400" height="500" />
+    )}
+    <Fragment slot="caption">
+      <span class="ig-caption__name">{handle}</span>
+      <span class="ig-caption__text">{loc.venueName}{loc.hallFloor ? ` · ${loc.hallFloor}` : ''}</span>
+    </Fragment>
+    <Fragment slot="extra">
+      <div class="ig-block ig-addr">
+        <span>{loc.address}</span>
+        <CopyButton text={loc.address} label="주소 복사" toast="주소가 복사되었습니다" />
+      </div>
+      {directions.venuePageUrl && (
+        <div class="ig-pagelink"><DeepLinkButton href={directions.venuePageUrl} label="약도·교통·주차 안내" /></div>
+      )}
+      <div class="ig-maplinks">
+        {directions.naverMapUrl && <DeepLinkButton href={directions.naverMapUrl} label="네이버지도" />}
+        {directions.kakaoMapUrl && <DeepLinkButton href={directions.kakaoMapUrl} label="카카오맵" />}
+        {directions.tmapUrl && <DeepLinkButton href={directions.tmapUrl} label="T맵" />}
+      </div>
+    </Fragment>
+  </IgPost>
+
+  {/* 4) 예식 안내 — 달력 + 카운트다운 */}
+  {calendar.enabled && (
+    <IgPost postId="post-calendar" handle={handle} avatar={avatar} locationTag="예식 안내" likes={140} timeAgo="3일 전">
+      <div slot="media" class="ig-cal">
+        {calendar.showCountdown && <p class="ig-cal__dday"><span data-dday data-target={cover.datetimeISO}>D-…</span></p>}
+        <table role="presentation">
+          <thead><tr>{weekdays.map((w, i) => <th class:list={[i === 0 && 'cal--sun']}>{w}</th>)}</tr></thead>
+          <tbody>
+            {Array.from({ length: Math.ceil(cells.length / 7) }, (_, row) => (
+              <tr>
+                {cells.slice(row * 7, row * 7 + 7).map((d, col) => (
+                  <td class:list={[d === g.weddingDay && 'cal__wed', col === 0 && d && 'cal--sun']}>
+                    {d ? <span>{d}</span> : ''}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="ig-cal__full">{dateKoFull(cover.datetimeISO)}</p>
+      </div>
+      <Fragment slot="caption">
+        <span class="ig-caption__name">{handle}</span>
+        <span class="ig-caption__text">{dateKoFull(cover.datetimeISO)} 💒</span>
+      </Fragment>
+    </IgPost>
+  )}
+
+  {/* 5) 마음 전하기 — 계좌 */}
+  {accounts.enabled && (
+    <IgPost postId="post-accounts" handle={handle} avatar={avatar} locationTag={accounts.heading} likes={64} timeAgo="4일 전">
+      <div slot="media" class="ig-artcard">
+        <span class="ig-artcard__emoji">💌</span>
+        <span class="ig-artcard__title">{accounts.heading}</span>
+        {accounts.reassuranceNote && <span class="ig-artcard__sub">{accounts.reassuranceNote}</span>}
+      </div>
+      <Fragment slot="caption">
+        <span class="ig-caption__name">{handle}</span>
+        <span class="ig-caption__text">축하의 마음을 전하실 수 있어요 🤍</span>
+      </Fragment>
+      <Fragment slot="extra">
+        <div class="ig-acct">
+          {groomAcct.length > 0 && <p class="ig-acct__side">신랑측</p>}
+          {groomAcct.map((a) => (
+            <div class="ig-acct__row">
+              <div>
+                <p class="ig-acct__who">{a.holderLabel}</p>
+                <p class="ig-acct__num">{a.bank} {a.number}</p>
+              </div>
+              <div class="ig-acct__btns">
+                <CopyButton text={a.number} label="복사" toast="계좌번호가 복사되었습니다" />
+                {a.kakaoPayUrl && <DeepLinkButton href={a.kakaoPayUrl} label="카카오페이" class="btn--kakaopay" />}
+              </div>
+            </div>
+          ))}
+          {brideAcct.length > 0 && <p class="ig-acct__side">신부측</p>}
+          {brideAcct.map((a) => (
+            <div class="ig-acct__row">
+              <div>
+                <p class="ig-acct__who">{a.holderLabel}</p>
+                <p class="ig-acct__num">{a.bank} {a.number}</p>
+              </div>
+              <div class="ig-acct__btns">
+                <CopyButton text={a.number} label="복사" toast="계좌번호가 복사되었습니다" />
+                {a.kakaoPayUrl && <DeepLinkButton href={a.kakaoPayUrl} label="카카오페이" class="btn--kakaopay" />}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Fragment>
+    </IgPost>
+  )}
+
+  {/* 6) 안내 사항 */}
+  {hasNotices && (
+    <IgPost postId="post-notices" handle={handle} avatar={avatar} locationTag="안내 사항" likes={51} timeAgo="5일 전">
+      <div slot="media" class="ig-artcard">
+        <span class="ig-artcard__emoji">📌</span>
+        <span class="ig-artcard__title">안내 사항</span>
+        {notices.declineWreath && <span class="ig-chip">화환은 정중히 사양합니다</span>}
+      </div>
+      <Fragment slot="caption">
+        <span class="ig-caption__name">{handle}</span>
+        <span class="ig-caption__text">예식 전 꼭 확인해 주세요 🙏</span>
+      </Fragment>
+      <Fragment slot="extra">
+        <div class="ig-notice">
+          {notices.items.map((n) => (
+            <div class="ig-notice__item">
+              <b>{n.title}</b>
+              <p>{n.body}</p>
+            </div>
+          ))}
+        </div>
+      </Fragment>
+    </IgPost>
+  )}
+</div>

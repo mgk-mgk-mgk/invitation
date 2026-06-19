@@ -1,0 +1,14 @@
+---
+import { chevronLeft, more, verified } from './icons';
+
+interface Props {
+  handle: string;
+}
+const { handle } = Astro.props;
+---
+
+<header class="ig-top">
+  <button class="ig-top__back" type="button" data-nav="top" aria-label="뒤로"><Fragment set:html={chevronLeft} /></button>
+  <span class="ig-top__user">{handle}<span class="ig-vrf" set:html={verified} /></span>
+  <button class="ig-top__more" type="button" aria-label="메뉴"><Fragment set:html={more} /></button>
+</header>
