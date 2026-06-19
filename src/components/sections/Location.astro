@@ -71,20 +71,20 @@ const { directions } = loc;
     border-radius: 0;
     margin-bottom: 1.4rem;
   }
-  /* 약도·교통·주차 안내 — 메인 버튼(accent) */
+  /* 약도·교통·주차 안내 — 흰색 카드(아래 지도 앱 버튼과 동일 톤) */
   .loc__pagelink { display: flex; justify-content: center; margin-bottom: 0.6rem; }
   .loc__pagelink :global(.btn--page) {
     width: 100%;
     max-width: 19rem;
     justify-content: center;
     gap: 0.45rem;
-    border: none;
+    border: 1px solid var(--c-line);
     border-radius: var(--radius);
-    background: var(--c-accent);
-    color: #fff;
+    background: var(--c-surface);
+    color: var(--c-ink);
     font-weight: 600;
     padding: 0.85rem 1rem;
-    box-shadow: 0 3px 10px rgba(44, 39, 34, 0.18);
+    box-shadow: 0 1px 4px rgba(44, 39, 34, 0.05);
     transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
   }
   .loc__pagelink :global(.btn--page)::before {
@@ -94,8 +94,8 @@ const { directions } = loc;
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z'/%3E%3C/svg%3E") center/contain no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z'/%3E%3C/svg%3E") center/contain no-repeat;
   }
-  .loc__pagelink :global(.btn--page:hover) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(44, 39, 34, 0.26); }
-  .loc__pagelink :global(.btn--page:active) { transform: translateY(0); filter: brightness(0.97); }
+  .loc__pagelink :global(.btn--page:hover) { transform: translateY(-2px); box-shadow: 0 5px 12px rgba(44, 39, 34, 0.1); }
+  .loc__pagelink :global(.btn--page:active) { transform: translateY(0); filter: brightness(0.98); }
 
   /* 지도 앱 버튼 — 3열 균등 카드(아이콘 + 라벨), 아이보리/골드 무드에 맞춘 저채도 톤 */
   .loc__links {
