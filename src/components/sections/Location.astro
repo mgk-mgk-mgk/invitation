@@ -57,14 +57,19 @@ const { directions } = loc;
   .loc__venue { font-family: var(--font-serif-ko); font-size: 1.15rem; margin: 0 0 0.2rem; }
   .loc__addr { font-size: 0.92rem; margin: 0.6rem 0 0.8rem; color: var(--c-ink); }
   .loc__map {
-    width: 100%;
-    aspect-ratio: 8 / 5;
+    /* 섹션 좌우 패딩(--pad-x)을 뚫고 폰 캔버스 가로 전체를 채우는 풀블리드 */
+    width: calc(100% + 2 * var(--pad-x));
+    margin-left: calc(-1 * var(--pad-x));
+    margin-right: calc(-1 * var(--pad-x));
+    aspect-ratio: 4 / 3;
     height: auto;
     display: block;
     object-fit: cover;
-    border-radius: var(--radius);
-    border: 1px solid var(--c-line);
-    margin-bottom: 1rem;
+    border: 0;
+    border-top: 1px solid var(--c-line);
+    border-bottom: 1px solid var(--c-line);
+    border-radius: 0;
+    margin-bottom: 1.4rem;
   }
   /* 약도·교통·주차 안내 — 메인 버튼(accent) */
   .loc__pagelink { display: flex; justify-content: center; margin-bottom: 0.6rem; }
