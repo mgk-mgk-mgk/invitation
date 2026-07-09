@@ -150,7 +150,9 @@ const withBase = (p: string): string => {
 const toAbsolute = (urlOrPath: string): string => {
   if (!SITE) return urlOrPath;
   const path = /^https?:\/\//.test(urlOrPath) ? new URL(urlOrPath).pathname : urlOrPath;
-  return SITE + (path.startsWith('/') ? path : '/' + path);
+  const basePath = BASE.replace(/\/+$/, '');
+  const normalizedPath = basePath && path.startsWith(basePath + '/') ? path.slice(basePath.length) : path;
+  return SITE + (normalizedPath.startsWith('/') ? normalizedPath : '/' + normalizedPath);
 };
 
 /**

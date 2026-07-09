@@ -68,7 +68,7 @@ export const wedding: WeddingConfig = {
   },
 
   share: {
-    siteUrl: 'https://your-invitation.pages.dev',
+    siteUrl: 'https://mgk-mgk-mgk.github.io/invitation/',
     ogTitle: '민구 ♥ 미진 결혼합니다',
     ogDescription: '2026.10.03 (토) 낮 12시 10분, 파티움하우스 수원 파티움홀',
     ogImage,

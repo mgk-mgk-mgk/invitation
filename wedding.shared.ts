@@ -94,4 +94,4 @@ export const guestbook: WeddingConfig['guestbook'] = {
 };
 
 /** 공유용 og:image(절대 URL). 제목·설명·링크·맺음말은 버전별로 다릅니다. */
-export const ogImage = 'https://your-invitation.pages.dev/images/og-1200x630.jpg';
+export const ogImage = 'https://mgk-mgk-mgk.github.io/invitation/images/og-1200x630.jpg';

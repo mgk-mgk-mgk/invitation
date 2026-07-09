@@ -47,7 +47,7 @@ export default function ShareBar({ title, description, imageUrl, linkUrl }: Prop
       <style>{`
         .sharebar {
           width: 100%;
-          padding: 0.25rem var(--pad-x) calc(1rem + env(safe-area-inset-bottom));
+          padding: 0.25rem var(--pad-x) calc(3.5rem + env(safe-area-inset-bottom));
           display: flex;
           justify-content: center;
           gap: 0.5rem;
