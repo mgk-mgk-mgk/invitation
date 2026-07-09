@@ -178,7 +178,7 @@ export function buildConfig(raw: unknown, routeBase = ''): WeddingConfig {
   data.gallery.images = data.gallery.images.map((img) => ({ ...img, src: withBase(img.src) }));
   if (data.coupleStory.filmSrc) data.coupleStory.filmSrc = withBase(data.coupleStory.filmSrc);
   if (data.coupleStory.filmPoster) data.coupleStory.filmPoster = withBase(data.coupleStory.filmPoster);
-  data.share.siteUrl = SITE ? SITE + routeBase : data.share.siteUrl;
+  data.share.siteUrl = SITE ? SITE + routeBase + (routeBase ? '' : '/') : data.share.siteUrl;
   data.share.ogImage = toAbsolute(data.share.ogImage);
   return data;
 }
