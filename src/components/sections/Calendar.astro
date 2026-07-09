@@ -15,20 +15,25 @@ const cells: (number | null)[] = [
 ];
 
 const weddingDayDow = dayOfWeekEn(cover.datetimeISO);
+const fullDate = dateKoFull(cover.datetimeISO);
+const [dateLine, timeLine] = fullDate.split(/ (?=오전|오후)/);
 ---
 
 <Section id="calendar" label="The Date" title="예식 안내">
-  <p class="cal__full center">{dateKoFull(cover.datetimeISO)}</p>
+  <p class="cal__full center">
+    <span>{dateLine}</span>
+    <span>{timeLine}</span>
+  </p>
 
   <table class="cal" role="presentation">
     <thead>
-      <tr>{weekdays.map((w, i) => <th class:list={[i === 0 && 'cal--sun']}>{w}</th>)}</tr>
+      <tr>{weekdays.map((w, i) => <th class:list={[i === 0 && 'cal--sun', i === 6 && 'cal--sat']}>{w}</th>)}</tr>
     </thead>
     <tbody>
       {Array.from({ length: Math.ceil(cells.length / 7) }, (_, row) => (
         <tr>
           {cells.slice(row * 7, row * 7 + 7).map((d, col) => (
-            <td class:list={[d === g.weddingDay && 'cal__wed', col === 0 && d && 'cal--sun']}>
+            <td class:list={[d === g.weddingDay && 'cal__wed', col === 0 && d && 'cal--sun', col === 6 && d && 'cal--sat']}>
               {d ? <span>{d}</span> : ''}
             </td>
           ))}
@@ -46,7 +51,15 @@ const weddingDayDow = dayOfWeekEn(cover.datetimeISO);
 </Section>
 
 <style>
-  .cal__full { font-family: var(--font-serif-ko); font-size: 1.05rem; margin: 0 0 1.5rem; }
+  .cal__full {
+    font-family: var(--font-serif-ko);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    margin: 0 0 1.5rem;
+  }
+  .cal__full span {
+    display: block;
+  }
   .cal {
     width: 100%;
     border-collapse: collapse;
@@ -66,7 +79,10 @@ const weddingDayDow = dayOfWeekEn(cover.datetimeISO);
     font-size: 0.9rem;
     color: var(--c-ink);
   }
-  .cal--sun { color: #c0716b; }
+  .cal th.cal--sun,
+  .cal td.cal--sun { color: #d33a32; }
+  .cal th.cal--sat,
+  .cal td.cal--sat { color: #1f6fd1; }
   .cal__wed span {
     display: inline-grid;
     place-items: center;

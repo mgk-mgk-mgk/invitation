@@ -60,20 +60,24 @@ export interface SharePayload {
 export async function shareToKakao(p: SharePayload): Promise<boolean> {
   const ok = await initKakao();
   if (!ok || !window.Kakao?.Share) return false;
-  window.Kakao.Share.sendDefault({
-    objectType: 'feed',
-    content: {
-      title: p.title,
-      description: p.description,
-      imageUrl: p.imageUrl,
-      link: { mobileWebUrl: p.linkUrl, webUrl: p.linkUrl },
-    },
-    buttons: [
-      {
-        title: '청첩장 보기',
+  try {
+    window.Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: p.title,
+        description: p.description,
+        imageUrl: p.imageUrl,
         link: { mobileWebUrl: p.linkUrl, webUrl: p.linkUrl },
       },
-    ],
-  });
-  return true;
+      buttons: [
+        {
+          title: '청첩장 보기',
+          link: { mobileWebUrl: p.linkUrl, webUrl: p.linkUrl },
+        },
+      ],
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }

@@ -63,11 +63,8 @@ export const wedding: WeddingConfig = {
   guestbook,
 
   notices: {
-    declineWreath: true,
-    items: [
-      { title: '화환', body: '화환은 정중히 사양합니다. 축하해 주시는 마음만 감사히 받겠습니다.' },
-      { title: '포토부스', body: '예식 당일 현장에서 찍은 사진을 함께 나눠요. 자유롭게 담아 가세요.' },
-    ],
+    declineWreath: false,
+    items: [],
   },
 
   share: {

@@ -1,54 +1,201 @@
 ---
 import Section from '@/components/ui/Section.astro';
 import defaultConfig from '@/lib/config';
-import Lightbox from '@/components/islands/Lightbox.tsx';
 
 const { config = defaultConfig } = Astro.props as { config?: typeof defaultConfig };
 const { gallery } = config;
+const gallerySlides = gallery.images.length > 1
+  ? [gallery.images[gallery.images.length - 1], ...gallery.images, gallery.images[0]]
+  : gallery.images;
 ---
 
 <Section id="gallery" label="Gallery" title="우리의 순간">
-  <div class:list={['grid', gallery.layout === 'carousel' && 'grid--scroll']}>
-    {gallery.images.map((img, i) => (
-      <button type="button" class="grid__item" data-gallery-item data-index={i} aria-label={`사진 ${i + 1} 크게 보기`}>
-        {/* 그리드는 가벼운 정사각 썸네일(thumb/). 확대(라이트박스)는 원본(img.src)을 사용. */}
-        <img src={img.src.replace('/gallery/', '/gallery/thumb/')} alt={img.alt} loading="lazy" decoding="async" width="400" height="400" />
-      </button>
-    ))}
-  </div>
+  <div class="gallery-viewer" data-gallery-viewer>
+    <div class="gallery-viewer__main">
+      <div class="gallery-viewer__track" data-gallery-track>
+        {gallerySlides.map((img, i) => (
+          <div class="gallery-viewer__slide">
+            <img
+              src={img.src}
+              alt={img.alt}
+              loading={i === 1 ? 'eager' : 'lazy'}
+              decoding="async"
+              width="900"
+              height="1200"
+            />
+          </div>
+        ))}
+      </div>
+      <button type="button" class="gallery-viewer__nav gallery-viewer__nav--prev" data-gallery-prev aria-label="이전 사진">‹</button>
+      <button type="button" class="gallery-viewer__nav gallery-viewer__nav--next" data-gallery-next aria-label="다음 사진">›</button>
+    </div>
 
-  <!-- 풀스크린 뷰어(섬) — 닫힌 상태엔 아무것도 안 그리므로 client:visible 이면 영영 hydrate 안 됨.
-       클릭 위임 리스너가 붙어야 썸네일 클릭 → 확대가 동작하므로 client:idle 로 확실히 hydrate. -->
-  <Lightbox client:idle images={gallery.images} />
+    <div class="gallery-viewer__thumbs" aria-label="사진 선택">
+      {gallery.images.map((img, i) => (
+        <button
+          type="button"
+          class:list={['gallery-viewer__thumb', i === 0 && 'is-active']}
+          data-gallery-thumb
+          data-index={i}
+          data-src={img.src}
+          data-alt={img.alt}
+          aria-label={`사진 ${i + 1} 선택`}
+          aria-current={i === 0 ? 'true' : 'false'}
+        >
+          <img src={img.src.replace('/gallery/', '/gallery/thumb/')} alt="" loading="lazy" decoding="async" width="160" height="160" />
+        </button>
+      ))}
+    </div>
+  </div>
 </Section>
 
 <style>
-  .grid {
+  .gallery-viewer {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
+    gap: 0.75rem;
   }
-  .grid--scroll {
-    grid-auto-flow: column;
-    grid-template-columns: none;
-    grid-auto-columns: 70%;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-  }
-  .grid--scroll .grid__item { scroll-snap-align: center; }
-  .grid__item {
-    padding: 0;
-    border: none;
+  .gallery-viewer__main {
+    position: relative;
+    aspect-ratio: 4 / 5;
     background: var(--c-line);
     border-radius: 8px;
     overflow: hidden;
-    aspect-ratio: 1 / 1;
-    cursor: pointer;
   }
-  .grid__item img {
+  .gallery-viewer__track {
+    display: flex;
+    height: 100%;
+    transform: translateX(-100%);
+    transition: transform 0.72s cubic-bezier(0.22, 0.8, 0.24, 1);
+    will-change: transform;
+  }
+  .gallery-viewer__slide {
+    flex: 0 0 100%;
+    min-width: 0;
+  }
+  .gallery-viewer__slide img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
+  .gallery-viewer__thumbs {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 58px;
+    gap: 0.45rem;
+    overflow: hidden;
+    overflow-x: auto;
+    padding-bottom: 0.1rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .gallery-viewer__thumbs::-webkit-scrollbar {
+    display: none;
+  }
+  .gallery-viewer__thumb {
+    width: 58px;
+    height: 58px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    background: var(--c-line);
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.62;
+  }
+  .gallery-viewer__thumb.is-active {
+    border-color: var(--c-accent);
+    opacity: 1;
+  }
+  .gallery-viewer__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .gallery-viewer__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(255,255,255,0.62);
+    border-radius: 999px;
+    background: rgba(44,39,34,0.38);
+    color: #fff;
+    font-size: 1.75rem;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .gallery-viewer__nav--prev { left: 0.7rem; }
+  .gallery-viewer__nav--next { right: 0.7rem; }
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-viewer__track { transition: none; }
+  }
 </style>
+
+<script>
+  const viewer = document.querySelector<HTMLElement>('[data-gallery-viewer]');
+  const track = viewer?.querySelector<HTMLElement>('[data-gallery-track]');
+  const thumbs = Array.from(viewer?.querySelectorAll<HTMLButtonElement>('[data-gallery-thumb]') ?? []);
+  let current = 0;
+  let visualIndex = thumbs.length > 1 ? 1 : 0;
+  let isAnimating = false;
+
+  if (viewer && track && thumbs.length) {
+    const setPosition = (index: number, animate = true) => {
+      track.style.transition = animate ? '' : 'none';
+      track.style.transform = `translateX(${-index * 100}%)`;
+      if (!animate) {
+        track.offsetHeight;
+        track.style.transition = '';
+      }
+    };
+
+    const setActiveThumb = () => {
+      const thumb = thumbs[current];
+
+      thumbs.forEach((item, i) => {
+        item.classList.toggle('is-active', i === current);
+        item.setAttribute('aria-current', i === current ? 'true' : 'false');
+      });
+      thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    };
+
+    const show = (index: number) => {
+      if (isAnimating) return;
+      current = (index + thumbs.length) % thumbs.length;
+      visualIndex = current + (thumbs.length > 1 ? 1 : 0);
+      isAnimating = true;
+      setPosition(visualIndex);
+      setActiveThumb();
+    };
+
+    const move = (dir: number) => {
+      if (isAnimating || thumbs.length < 2) return;
+      current = (current + dir + thumbs.length) % thumbs.length;
+      visualIndex += dir;
+      isAnimating = true;
+      setPosition(visualIndex);
+      setActiveThumb();
+    };
+
+    track.addEventListener('transitionend', () => {
+      isAnimating = false;
+      if (thumbs.length < 2) return;
+      if (visualIndex === 0) {
+        visualIndex = thumbs.length;
+        setPosition(visualIndex, false);
+      }
+      if (visualIndex === thumbs.length + 1) {
+        visualIndex = 1;
+        setPosition(visualIndex, false);
+      }
+    });
+
+    setPosition(visualIndex, false);
+    thumbs.forEach((thumb, i) => thumb.addEventListener('click', () => show(i)));
+    viewer.querySelector('[data-gallery-prev]')?.addEventListener('click', () => move(-1));
+    viewer.querySelector('[data-gallery-next]')?.addEventListener('click', () => move(1));
+  }
+</script>

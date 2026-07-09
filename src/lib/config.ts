@@ -137,7 +137,7 @@ const configSchema = z.object({
 // 그래서 로컬 에셋(/images, /bgm.mp3)에는 base 를, 공유용 OG 절대 URL 에는 origin+base 를
 // 붙여야 합니다. env 미설정(로컬/루트 배포) 시에는 원본 값을 그대로 둡니다.
 const BASE = import.meta.env.BASE_URL || '/'; // 예: '/invitation/' (로컬 '/')
-const ORIGIN = import.meta.env.PUBLIC_SITE_ORIGIN as string | undefined; // 예: 'https://user.github.io'
+const ORIGIN = (import.meta.env.PUBLIC_SITE_ORIGIN || import.meta.env.PUBLIC_SITE_URL) as string | undefined; // 예: 'https://user.github.io'
 const SITE = ORIGIN ? ORIGIN.replace(/\/+$/, '') + BASE.replace(/\/+$/, '') : undefined;
 
 /** 로컬 에셋 경로에 base prefix. 이미 절대(http/data)면 그대로. */
