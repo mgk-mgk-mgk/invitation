@@ -169,9 +169,26 @@ a{ color:var(--accent); text-decoration:none; }
   text-align:center; padding:calc(48px + env(safe-area-inset-top)) 28px 96px;
   position:relative; overflow:hidden;
 }
-/* petals sit BEHIND the hero text (z-index:-1) so a compositor glitch can never
-   cover the type; the JS only reallocates the canvas on width change */
-#motes{ position:absolute; inset:0; z-index:-1; pointer-events:none; }
+/* falling petals — PURE CSS transform animation, no <canvas>/rAF.
+   An animated full-viewport canvas hung the renderer on Android; CSS transforms
+   run on the compositor thread, so they never block the main thread. Behind text. */
+.petals{ position:absolute; inset:0; z-index:-1; overflow:hidden; pointer-events:none; }
+.petal{
+  position:absolute; top:0; left:var(--x);
+  width:var(--s); height:var(--s);
+  background:var(--text-faint); border-radius:50% 0 50% 0;
+  opacity:0;
+  animation:petal-fall var(--dur) linear var(--delay) infinite;
+}
+@keyframes petal-fall{
+  0%  { transform:translate(0,-12vh) rotate(0deg);   opacity:0; }
+  12% { opacity:var(--op); }
+  35% { transform:translate(var(--sway),28vh) rotate(120deg); }
+  65% { transform:translate(calc(var(--sway) * -1),62vh) rotate(240deg); }
+  88% { opacity:var(--op); }
+  100%{ transform:translate(0,116vh) rotate(360deg); opacity:0; }
+}
+@media (prefers-reduced-motion: reduce){ .petals{ display:none; } }
 
 .hero-eyebrow{
   font-size:10.5px; letter-spacing:.44em; text-indent:.44em;
@@ -615,7 +632,7 @@ footer{
 
   <!-- ======================= HERO ======================= -->
   <header class="hero">
-    <canvas id="motes" aria-hidden="true"></canvas>
+    <div class="petals" id="petals" aria-hidden="true"></div>
     <p class="hero-eyebrow latin">The Marriage Of</p>
 
     <div class="moon" role="img" aria-label="두 개의 반이 합쳐져 하나가 된 달항아리">
@@ -972,79 +989,25 @@ window.addEventListener('load', () => {
   setTimeout(() => document.body.classList.add('is-loaded'), REDUCED ? 0 : 250);
 });
 
-/* ---------- drifting petals (hero) — behind text, resize-safe ---------- */
+/* ---------- falling petals — build static DOM once; CSS does all the motion ---------- */
 (function petals(){
-  const cv = document.getElementById('motes');
-  if (!cv) return;
-  const ctx = cv.getContext('2d');
-  const motion = matchMedia('(prefers-reduced-motion: reduce)');
-  let W = 0, H = 0, dpr = 1, parts = [], raf = 0, lastW = -1, debounce = 0;
-
-  const themeColor = () =>
-    getComputedStyle(document.documentElement).getPropertyValue('--text-faint').trim() || '#999';
-  let color = themeColor();
-
-  /* (re)allocate the canvas + particles — called only on first run and real width changes */
-  function build(){
-    dpr = Math.min(devicePixelRatio || 1, 2);
-    W = cv.clientWidth; H = cv.clientHeight;
-    lastW = W;
-    if (!W || !H) return;
-    cv.width = W * dpr; cv.height = H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const n = Math.max(6, Math.min(18, Math.round(W * H / 32000)));
-    parts = Array.from({ length: n }, () => ({
-      x: Math.random() * W, y: Math.random() * H,
-      r: .8 + Math.random() * 1.7,
-      vy: .10 + Math.random() * .22,
-      drift: .3 + Math.random() * .6,
-      ph: Math.random() * Math.PI * 2,
-      a: .12 + Math.random() * .28,
-    }));
+  const wrap = document.getElementById('petals');
+  if (!wrap || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < 12; i++){
+    const p = document.createElement('i');
+    p.className = 'petal';
+    p.style.cssText =
+      `--x:${rnd(2, 96).toFixed(1)}%;` +
+      `--s:${rnd(5, 11).toFixed(1)}px;` +
+      `--dur:${rnd(9, 17).toFixed(1)}s;` +
+      `--delay:${(-rnd(0, 17)).toFixed(1)}s;` +   /* negative → spread out, mid-fall at load */
+      `--sway:${rnd(-22, 22).toFixed(0)}px;` +
+      `--op:${rnd(0.10, 0.32).toFixed(2)};`;
+    frag.appendChild(p);
   }
-  function frame(){
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = color;
-    for (const p of parts){
-      p.y += p.vy;                 /* gentle fall */
-      p.ph += .012;
-      if (p.y > H + 4){ p.y = -4; p.x = Math.random() * W; }
-      ctx.globalAlpha = p.a * (0.55 + 0.45 * Math.sin(p.ph * 2));
-      ctx.beginPath();
-      ctx.arc(p.x + Math.sin(p.ph) * 10 * p.drift, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-    raf = requestAnimationFrame(frame);
-  }
-  function play(){ if (motion.matches) return; cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); }
-  function pause(){ cancelAnimationFrame(raf); }
-
-  if (!motion.matches){ build(); play(); }
-
-  /* Android fires height-only resizes constantly while the address bar toggles on
-     scroll — debounce, and only reallocate when the WIDTH actually changed. */
-  addEventListener('resize', () => {
-    if (motion.matches) return;
-    clearTimeout(debounce);
-    debounce = setTimeout(() => {
-      if (cv.clientWidth === lastW) return;   /* width unchanged → no realloc → no freeze */
-      build(); play();
-    }, 250);
-  }, { passive: true });
-
-  /* tab away/back: just pause/resume the loop — never reallocate the canvas here */
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) pause(); else play();
-  });
-
-  motion.addEventListener?.('change', e => {
-    if (e.matches){ pause(); ctx.clearRect(0, 0, W, H); } else { build(); play(); }
-  });
-
-  new MutationObserver(() => { color = themeColor(); })
-    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { color = themeColor(); });
+  wrap.appendChild(frag);
 })();
 
 /* ---------- scroll reveals ---------- */
