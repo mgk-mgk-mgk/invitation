@@ -121,10 +121,13 @@ a{ color:var(--accent); text-decoration:none; }
   .app{ border-inline:1px solid var(--line-soft); }
 }
 
-/* subtle paper grain over everything (grain asset + blend come from theme tokens) */
+/* subtle paper grain over everything.
+   NOTE: no mix-blend-mode — a page-tall blended layer gets dropped/blanked by
+   Chromium's tile compositor when the mobile address bar toggles on scroll.
+   The grain sources are near-pure black/white, so plain compositing looks the same. */
 .app::before{
   content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
-  opacity:var(--grain-op); mix-blend-mode:var(--grain-blend);
+  opacity:var(--grain-op);
   background-image:var(--grain);
 }
 
@@ -140,8 +143,9 @@ a{ color:var(--accent); text-decoration:none; }
   width:44px; height:44px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
   color:var(--text-soft);
-  background:color-mix(in srgb, var(--bg) 72%, transparent);
-  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  /* solid-ish bg instead of backdrop-filter: a sticky backdrop-filter element
+     is the other effect Chromium drops/blanks during scroll recompositing */
+  background:color-mix(in srgb, var(--bg) 90%, transparent);
   border:1px solid var(--line);
   transition:color .3s, transform .15s;
 }
