@@ -560,9 +560,12 @@ footer{
 .foot-line{ font-size:13.5px; color:var(--text-soft); }
 .share-row{ display:flex; justify-content:center; gap:10px; margin-top:26px; }
 .foot-sign{
-  margin-top:38px; font-size:11px; letter-spacing:.34em; text-indent:.34em;
-  color:var(--text-faint); text-transform:uppercase;
+  margin-top:38px; font-size:11px; letter-spacing:.34em;
+  color:var(--text-faint); text-transform:uppercase; line-height:2;
 }
+/* split into deliberate lines (name / date) so it never wraps awkwardly on mobile;
+   text-indent compensates the trailing letter-spacing to keep each line centered */
+.foot-sign span{ display:block; text-indent:.34em; }
 
 /* ---------- toast ---------- */
 .toast{
@@ -823,7 +826,7 @@ footer{
       <button class="pill" id="shareBtn">청첩장 공유하기</button>
       <button class="pill" id="copyLinkBtn">링크 복사</button>
     </div>
-    <p class="foot-sign latin reveal" data-fill="footSign">Mingu &amp; Mijin — October 3rd, 2026</p>
+    <p class="foot-sign latin reveal" id="footSign"><span>Mingu &amp; Mijin</span><span>October 3rd, 2026</span></p>
   </footer>
 </div>
 
@@ -937,6 +940,17 @@ document.title = `${CONFIG.groomFirst} ♥ ${CONFIG.brideFirst} — ${W_Y}. ${St
 $('#heroBigM').textContent = String(W_M).padStart(2, '0');
 $('#heroBigD').textContent = String(W_D).padStart(2, '0');
 $('#seals').setAttribute('aria-label', `신랑 ${CONFIG.groomFirst}, 신부 ${CONFIG.brideFirst}의 인장`);
+/* footer signature — split on the em-dash into deliberate name / date lines */
+(function(){
+  const el = $('#footSign');
+  if (!el) return;
+  el.textContent = '';
+  CONFIG.footSign.split(/\s*—\s*/).forEach(part => {
+    const s = document.createElement('span');
+    s.textContent = part;
+    el.appendChild(s);
+  });
+})();
 $$('.copy-mini[data-copy]').forEach(b => { b.dataset.copy = CONFIG.venueAddr; });
 
 /* google map embed + map-app deep links */
