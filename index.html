@@ -169,7 +169,6 @@ a{ color:var(--accent); text-decoration:none; }
   text-align:center; padding:calc(48px + env(safe-area-inset-top)) 28px 96px;
   position:relative; overflow:hidden;
 }
-#motes{ position:absolute; inset:0; pointer-events:none; }
 
 .hero-eyebrow{
   font-size:10.5px; letter-spacing:.44em; text-indent:.44em;
@@ -613,7 +612,6 @@ footer{
 
   <!-- ======================= HERO ======================= -->
   <header class="hero">
-    <canvas id="motes" aria-hidden="true"></canvas>
     <p class="hero-eyebrow latin">The Marriage Of</p>
 
     <div class="moon" role="img" aria-label="두 개의 반이 합쳐져 하나가 된 달항아리">
@@ -969,66 +967,6 @@ else $('#venuePage').style.display = 'none';
 window.addEventListener('load', () => {
   setTimeout(() => document.body.classList.add('is-loaded'), REDUCED ? 0 : 250);
 });
-
-/* ---------- drifting moonlight motes (hero) ---------- */
-(function motes(){
-  const cv = $('#motes'), ctx = cv.getContext('2d');
-  const motion = matchMedia('(prefers-reduced-motion: reduce)');
-  let W = 0, H = 0, dpr, parts = [], raf;
-  function themeColor(){
-    return getComputedStyle(document.documentElement).getPropertyValue('--text-faint').trim() || '#999';
-  }
-  let color = themeColor();
-  function size(){
-    dpr = Math.min(devicePixelRatio || 1, 2);
-    W = cv.clientWidth; H = cv.clientHeight;
-    cv.width = W * dpr; cv.height = H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  function spawn(n){
-    parts = [];
-    for (let i = 0; i < n; i++){
-      parts.push({
-        x: Math.random() * W, y: Math.random() * H,
-        r: .6 + Math.random() * 1.4,
-        vy: .06 + Math.random() * .18,
-        ph: Math.random() * Math.PI * 2,
-        sw: .12 + Math.random() * .3,
-        a: .12 + Math.random() * .3,
-      });
-    }
-  }
-  function tick(){
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = color;
-    for (const p of parts){
-      p.y -= p.vy;
-      p.ph += .008;
-      if (p.y < -4){ p.y = H + 4; p.x = Math.random() * W; }
-      ctx.globalAlpha = p.a * (0.6 + 0.4 * Math.sin(p.ph * 3));
-      ctx.beginPath();
-      ctx.arc(p.x + Math.sin(p.ph) * 14 * p.sw, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-    raf = requestAnimationFrame(tick);
-  }
-  /* halt() before every (re)start so only one rAF loop ever exists */
-  function halt(){ cancelAnimationFrame(raf); }
-  function start(){ halt(); size(); spawn(Math.round(W * H / 26000)); color = themeColor(); tick(); }
-  if (!motion.matches) start();
-  addEventListener('resize', () => { if (!motion.matches) start(); });
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) halt();
-    else if (!motion.matches){ halt(); color = themeColor(); tick(); }
-  });
-  motion.addEventListener?.('change', e => {
-    if (e.matches){ halt(); ctx.clearRect(0, 0, W, H); } else start();
-  });
-  /* redraw color when the theme flips */
-  new MutationObserver(() => { color = themeColor(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { color = themeColor(); });
-})();
 
 /* ---------- scroll reveals ---------- */
 (function reveals(){
