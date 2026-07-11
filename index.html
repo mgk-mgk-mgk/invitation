@@ -480,9 +480,11 @@ main{ padding-bottom:20px; }
   overflow:hidden; box-shadow:var(--shadow-sm);
 }
 .venue-map-wrap{ position:relative; }
+.venue-map-wrap.unlocked{ overscroll-behavior:contain; }
 .venue-map{
   display:block; width:100%; aspect-ratio:16/10; border:0;
   background:var(--card);
+  touch-action:auto;
 }
 .venue-map-shield{
   --map-button-w:170px;
@@ -765,6 +767,7 @@ footer{
           <iframe class="venue-map" id="venueMap"
                   title="파티움하우스 수원 지도 (구글 지도)"
                   loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                  allow="fullscreen; geolocation"
                   allowfullscreen></iframe>
           <div class="venue-map-shield" aria-hidden="true">
             <i class="right"></i>
@@ -986,13 +989,10 @@ else $('#venuePage').style.display = 'none';
     btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     btn.textContent = on ? '지도 잠금' : '지도 조작';
     clearTimeout(lockTimer);
-    if (on) lockTimer = setTimeout(() => setUnlocked(false), 15000);
+    if (on) lockTimer = setTimeout(() => setUnlocked(false), 30000);
   }
 
   btn.addEventListener('click', () => setUnlocked(!wrap.classList.contains('unlocked')));
-  window.addEventListener('scroll', () => {
-    if (wrap.classList.contains('unlocked')) setUnlocked(false);
-  }, { passive: true });
 })();
 
 /* T Map app links need a direct scheme navigation from the tap event.
