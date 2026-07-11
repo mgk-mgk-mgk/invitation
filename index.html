@@ -91,11 +91,15 @@
 
 /* ---------- base ---------- */
 *{ box-sizing:border-box; margin:0; padding:0; }
-html{ -webkit-text-size-adjust:100%; }
+html{
+  width:100%; max-width:100%; overflow-x:hidden;
+  -webkit-text-size-adjust:100%;
+}
 body{
   font-family:"Apple SD Gothic Neo","Pretendard Variable",Pretendard,"Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
   font-size:15.5px; line-height:1.9; font-weight:400;
   color:var(--text); background:var(--bg-deep);
+  width:100%; max-width:100%; overflow-x:hidden;
   word-break:keep-all; overflow-wrap:break-word;
   -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
   -webkit-tap-highlight-color:transparent;
@@ -114,9 +118,10 @@ a{ color:var(--accent); text-decoration:none; }
 /* ---------- the invitation column ---------- */
 .app{
   position:relative;
-  max-width:460px; margin-inline:auto;
+  width:100%; max-width:460px; margin-inline:auto;
   background:var(--bg);
   min-height:100vh; min-height:100svh;
+  overflow-x:hidden;
 }
 @media (min-width: 520px){
   .app{ border-inline:1px solid var(--line-soft); }
@@ -590,6 +595,7 @@ footer{
   padding:calc(34px + env(safe-area-inset-top)) 28px calc(34px + env(safe-area-inset-bottom));
   background:var(--bg);
   color:var(--text);
+  width:100%; max-width:100%; overflow:hidden;
   transition:opacity .7s ease, visibility .7s ease;
 }
 .intro::before{
