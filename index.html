@@ -303,37 +303,8 @@ main{ padding-bottom:20px; }
 .invite-body p + p{ margin-top:26px; }
 .invite-body strong{ font-weight:500; color:var(--text); }
 
-/* the red seals — stamped on scroll */
-.seals{ display:flex; justify-content:center; gap:18px; margin-top:44px; }
-.seal{
-  width:52px; height:52px; border-radius:10px;
-  background:var(--seal);
-  color:var(--seal-ink);
-  display:flex; align-items:center; justify-content:center;
-  font-size:15px; font-weight:600; letter-spacing:.1em;
-  writing-mode:vertical-rl; text-orientation:upright; line-height:1;
-  box-shadow:inset 0 0 0 2px color-mix(in srgb, var(--seal-ink) 34%, transparent), var(--shadow-sm);
-  opacity:0; transform:scale(1.7) rotate(0deg);
-}
-.seal:nth-child(2){ transform:scale(1.7) rotate(0deg); }
-.seals.stamped .seal{
-  animation:stamp .55s cubic-bezier(.2,1.4,.4,1) forwards;
-}
-.seals.stamped .seal:nth-child(2){ animation-delay:.35s; }
-@keyframes stamp{
-  0%{ opacity:0; transform:scale(1.7); }
-  62%{ opacity:1; transform:scale(.94) rotate(-3deg); }
-  100%{ opacity:1; transform:scale(1) rotate(-2.5deg); }
-}
-.seals.stamped .seal.b{ animation-name:stampB; }
-@keyframes stampB{
-  0%{ opacity:0; transform:scale(1.7); }
-  62%{ opacity:1; transform:scale(.94) rotate(3deg); }
-  100%{ opacity:1; transform:scale(1) rotate(2.5deg); }
-}
-
 /* ---------- family / 혼주 ---------- */
-.family{ text-align:center; }
+.invite-family{ margin-top:44px; text-align:center; }
 /* the block stays centered on the page; rows right-align to each other so the
    groom (two parents) and bride (one parent) names line up at the same edge */
 .family-names{ display:inline-block; text-align:right; }
@@ -610,7 +581,6 @@ footer{
   .moon-seam{ opacity:.55; }
   .reveal{ opacity:1; transform:none; }
   .scroll-cue i{ animation:none; }
-  .seals .seal{ opacity:1; transform:scale(1); }
 }
 </style>
 </head>
@@ -680,27 +650,15 @@ footer{
           더없는 기쁨으로 간직하겠습니다.
         </p>
       </div>
-      <div class="seals reveal" id="seals" role="img" aria-label="신랑 민구, 신부 미진의 인장">
-        <span class="seal" data-fill="groomFirst">민구</span>
-        <span class="seal b" data-fill="brideFirst">미진</span>
-      </div>
-    </section>
-
-    <div class="divider" aria-hidden="true"></div>
-
-    <!-- ======================= FAMILY ======================= -->
-    <section class="sec family" id="family">
-      <div class="sec-head reveal">
-        <p class="sec-eyebrow latin">With Our Families</p>
-        <h2 class="sec-title">두 사람의 가족</h2>
-      </div>
-      <div class="reveal family-names">
-        <p class="family-row">
-          <span class="parents" data-fill="groomParents">강남석 · 박선옥</span><span class="rel">의 장남</span> <span class="who" data-fill="groomName">강민구</span>
-        </p>
-        <p class="family-row">
-          <span class="parents" data-fill="brideParents">김점자</span><span class="rel">의 차녀</span> <span class="who" data-fill="brideName">유미진</span>
-        </p>
+      <div class="reveal invite-family">
+        <div class="family-names">
+          <p class="family-row">
+            <span class="parents" data-fill="groomParents">강남석 · 박선옥</span><span class="rel">의 장남</span> <span class="who" data-fill="groomName">강민구</span>
+          </p>
+          <p class="family-row">
+            <span class="parents" data-fill="brideParents">김점자</span><span class="rel">의 차녀</span> <span class="who" data-fill="brideName">유미진</span>
+          </p>
+        </div>
       </div>
     </section>
 
@@ -963,7 +921,6 @@ const [W_Y, W_M, W_D] = CONFIG.weddingISO.slice(0, 10).split('-').map(Number);
 document.title = `${CONFIG.groomFirst} ♥ ${CONFIG.brideFirst} — ${W_Y}. ${String(W_M).padStart(2,'0')}. ${String(W_D).padStart(2,'0')}. 결혼합니다`;
 $('#heroBigM').textContent = String(W_M).padStart(2, '0');
 $('#heroBigD').textContent = String(W_D).padStart(2, '0');
-$('#seals').setAttribute('aria-label', `신랑 ${CONFIG.groomFirst}, 신부 ${CONFIG.brideFirst}의 인장`);
 /* footer signature — split on the em-dash into deliberate name / date lines */
 (function(){
   const el = $('#footSign');
@@ -1036,7 +993,6 @@ window.addEventListener('load', () => {
   const els = $$('.reveal');
   if (!('IntersectionObserver' in window) || REDUCED){
     els.forEach(el => el.classList.add('in'));
-    $('#seals').classList.add('stamped');
     return;
   }
   const io = new IntersectionObserver(entries => {
@@ -1045,13 +1001,6 @@ window.addEventListener('load', () => {
     });
   }, { threshold: .18, rootMargin: '0px 0px -6% 0px' });
   els.forEach(el => io.observe(el));
-
-  const sealIo = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting){ e.target.classList.add('stamped'); sealIo.unobserve(e.target); }
-    });
-  }, { threshold: .7 });
-  sealIo.observe($('#seals'));
 })();
 
 /* ---------- calendar (built from KST wall-clock digits, not viewer-local time) ---------- */
