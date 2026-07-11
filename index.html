@@ -100,6 +100,7 @@ body{
   -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
   -webkit-tap-highlight-color:transparent;
 }
+body.intro-open{ overflow:hidden; }
 button, input, textarea{ font:inherit; color:inherit; }
 button{ background:none; border:0; cursor:pointer; }
 a{ color:var(--accent); text-decoration:none; }
@@ -582,6 +583,63 @@ footer{
 }
 .toast.show{ opacity:1; transform:translate(-50%, 0); }
 
+/* ---------- opening intro ---------- */
+.intro{
+  position:fixed; inset:0; z-index:200;
+  display:flex; align-items:center; justify-content:center;
+  padding:calc(34px + env(safe-area-inset-top)) 28px calc(34px + env(safe-area-inset-bottom));
+  background:var(--bg);
+  color:var(--text);
+  transition:opacity .7s ease, visibility .7s ease;
+}
+.intro::before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  opacity:var(--grain-op); background-image:var(--grain);
+}
+.intro.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+.intro-inner{
+  position:relative; z-index:1; width:min(100%, 360px);
+  min-height:min(640px, 86svh);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center;
+}
+.intro-eyebrow{
+  font-size:10px; letter-spacing:.42em; text-indent:.42em;
+  color:var(--seal); text-transform:uppercase;
+}
+.intro-moon{
+  position:relative; width:142px; height:142px; border-radius:50%;
+  margin:44px auto 40px;
+  background:radial-gradient(circle at 38% 32%, var(--moon-hi), var(--moon-lo) 82%);
+  box-shadow:0 24px 36px var(--moon-shadow);
+}
+.intro-moon::after{
+  content:""; position:absolute; left:8%; right:8%; top:50%; height:1px;
+  background:linear-gradient(90deg, transparent, color-mix(in srgb, var(--text) 22%, transparent), transparent);
+}
+.intro-title{
+  font-size:24px; font-weight:300; letter-spacing:.18em; text-indent:.18em;
+  line-height:1.7; color:var(--text);
+}
+.intro-title .knot{ color:var(--seal); padding:0 .22em; }
+.intro-copy{
+  margin-top:22px; font-size:13.5px; line-height:2;
+  color:var(--text-soft); letter-spacing:.08em;
+}
+.intro-date{
+  margin-top:28px; font-size:12px; color:var(--text-faint);
+  letter-spacing:.12em;
+}
+.intro-enter{
+  margin-top:48px;
+  min-height:48px; padding:11px 32px; border-radius:999px;
+  border:1px solid var(--text); background:var(--text); color:var(--bg);
+  font-size:13px; letter-spacing:.16em; text-indent:.16em;
+  box-shadow:var(--shadow-sm);
+  transition:transform .12s, opacity .25s;
+}
+.intro-enter:active{ transform:scale(.97); }
+
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce){
   *{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
@@ -593,7 +651,23 @@ footer{
 }
 </style>
 </head>
-<body>
+<body class="intro-open">
+
+<div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+  <div class="intro-inner">
+    <p class="intro-eyebrow latin">Invitation</p>
+    <div class="intro-moon" aria-hidden="true"></div>
+    <h1 class="intro-title" id="introTitle">
+      <span data-fill="groomName">강민구</span><span class="knot" aria-hidden="true">·</span><span data-fill="brideName">유미진</span>
+    </h1>
+    <p class="intro-copy">
+      두 사람이 하나의 달이 되는 날<br>
+      소중한 분들을 초대합니다
+    </p>
+    <p class="intro-date" data-fill="dateLine">2026년 10월 3일 토요일 낮 12시 10분</p>
+    <button class="intro-enter" id="introEnter" type="button">초대장 열기</button>
+  </div>
+</div>
 
 <div class="app" id="app">
   <div class="float-ui">
@@ -932,6 +1006,24 @@ $$('[data-fill]').forEach(el => {
   const key = el.dataset.fill.replace(/\d+$/, '');
   if (CONFIG[key] != null) el.textContent = CONFIG[key];
 });
+
+/* ---------- opening intro ---------- */
+(function intro(){
+  const intro = $('#intro');
+  const btn = $('#introEnter');
+  if (!intro || !btn) return;
+
+  function enter(){
+    intro.classList.add('hide');
+    document.body.classList.remove('intro-open');
+    setTimeout(() => intro.remove(), REDUCED ? 0 : 750);
+  }
+  btn.addEventListener('click', enter);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') enter();
+  }, { once: true });
+})();
+
 /* the wedding date, parsed as KST wall-clock digits (immune to the viewer's timezone) */
 const [W_Y, W_M, W_D] = CONFIG.weddingISO.slice(0, 10).split('-').map(Number);
 document.title = `${CONFIG.groomFirst} ♥ ${CONFIG.brideFirst} — ${W_Y}. ${String(W_M).padStart(2,'0')}. ${String(W_D).padStart(2,'0')}. 결혼합니다`;
