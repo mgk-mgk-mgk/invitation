@@ -480,11 +480,9 @@ main{ padding-bottom:20px; }
   overflow:hidden; box-shadow:var(--shadow-sm);
 }
 .venue-map-wrap{ position:relative; }
-.venue-map-wrap.unlocked{ overscroll-behavior:contain; }
 .venue-map{
-  display:block; width:100%; aspect-ratio:16/10; border:0;
+  display:block; width:100%; aspect-ratio:10/7; border:0;
   background:var(--card);
-  touch-action:auto;
 }
 .venue-map-shield{
   --map-button-w:170px;
@@ -494,20 +492,6 @@ main{ padding-bottom:20px; }
 .venue-map-shield i{ position:absolute; pointer-events:auto; }
 .venue-map-shield .right{ top:0; right:0; left:var(--map-button-w); height:var(--map-button-h); }
 .venue-map-shield .bottom{ left:0; right:0; top:var(--map-button-h); bottom:0; }
-.venue-map-wrap.unlocked .venue-map-shield{ display:none; }
-.map-unlock-btn{
-  position:absolute; right:12px; bottom:12px; z-index:3;
-  display:inline-flex; align-items:center; justify-content:center;
-  min-height:38px; padding:8px 14px; border-radius:999px;
-  background:color-mix(in srgb, var(--card) 94%, transparent);
-  border:1px solid var(--line);
-  color:var(--text); box-shadow:var(--shadow-sm);
-  font-size:12px; letter-spacing:.08em;
-}
-.map-unlock-btn[aria-pressed="true"]{
-  background:var(--text); border-color:var(--text); color:var(--bg);
-}
-.map-unlock-btn:active{ transform:scale(.97); }
 .venue-body{ padding:24px 22px 22px; }
 .venue-name{ font-size:17px; font-weight:500; letter-spacing:.08em; color:var(--text); text-align:center; }
 .venue-addr{
@@ -773,7 +757,6 @@ footer{
             <i class="right"></i>
             <i class="bottom"></i>
           </div>
-          <button class="map-unlock-btn" id="mapUnlockBtn" type="button" aria-pressed="false">지도 조작</button>
         </div>
         <div class="venue-body">
           <p class="venue-name"><span data-fill="venueName3">파티움하우스 수원</span> <span style="font-size:12px;color:var(--text-faint)" data-fill="venueHall">파티움홀 (3층)</span></p>
@@ -975,25 +958,6 @@ $('#mapTmap').href   = CONFIG.mapTmapUrl;
 $('#mapTmap').dataset.fallback = CONFIG.mapTmapFallbackUrl;
 if (CONFIG.venuePageUrl) $('#venuePage').href = CONFIG.venuePageUrl;
 else $('#venuePage').style.display = 'none';
-
-/* Keep the embedded map locked by default so accidental swipes do not hijack
-   the page. Let users opt into map pan/zoom briefly when they need it. */
-(function mapInteractionLock(){
-  const wrap = $('.venue-map-wrap');
-  const btn = $('#mapUnlockBtn');
-  if (!wrap || !btn) return;
-
-  let lockTimer = null;
-  function setUnlocked(on){
-    wrap.classList.toggle('unlocked', on);
-    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    btn.textContent = on ? '지도 잠금' : '지도 조작';
-    clearTimeout(lockTimer);
-    if (on) lockTimer = setTimeout(() => setUnlocked(false), 30000);
-  }
-
-  btn.addEventListener('click', () => setUnlocked(!wrap.classList.contains('unlocked')));
-})();
 
 /* T Map app links need a direct scheme navigation from the tap event.
    Keep the old web link as a fallback for users without the app installed. */
