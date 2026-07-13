@@ -202,6 +202,9 @@ a{ color:var(--accent); text-decoration:none; }
   100%{ transform:translate(0,116vh) rotate(360deg); opacity:0; }
 }
 @media (prefers-reduced-motion: reduce){ .petals{ display:none; } }
+/* one-shot confetti burst on the intro reveal — reuses .petal motion */
+.petals--burst{ position:fixed; inset:0; z-index:120; overflow:hidden; pointer-events:none; }
+.petals--burst .petal{ animation-iteration-count:1; }
 
 .hero-eyebrow{
   font-size:10.5px; letter-spacing:.44em; text-indent:.44em;
@@ -432,38 +435,48 @@ main{ padding-bottom:20px; }
 }
 .dday-line b{ font-weight:600; color:var(--seal); font-variant-numeric:tabular-nums; }
 
-/* ---------- gallery ---------- */
+/* ---------- gallery: 우리의 순간 (editorial collage) ---------- */
 .sec.gallery{ padding-inline:0; }
 .gallery .sec-head{ padding-inline:28px; }
-.g-track{
-  display:flex; gap:14px; overflow-x:auto; padding:6px 28px 18px;
-  scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
-  overscroll-behavior-x:contain;
-  scrollbar-width:none;
+.g-collage{
+  display:grid; grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:10px; align-items:start; padding:6px 28px 0;
 }
-.g-track::-webkit-scrollbar{ display:none; }
-.g-item{ flex:0 0 76%; scroll-snap-align:center; }
-.g-card{
-  width:100%;
-  border-radius:8px; overflow:hidden; position:relative;
-  aspect-ratio:4/5; background:var(--card);
-  border:1px solid var(--line-soft); box-shadow:var(--shadow-sm);
-  padding:0; text-align:inherit; display:block;
+.g-photo{
+  position:relative; display:block; min-width:44px; min-height:44px;
+  padding:0; border:0; border-radius:6px; overflow:hidden;
+  background:var(--card); cursor:zoom-in; box-shadow:var(--shadow-sm);
 }
-.g-card canvas, .g-card img{ width:100%; height:100%; display:block; object-fit:cover; }
-.g-cap{
-  position:absolute; left:0; right:0; bottom:0; padding:38px 16px 13px;
-  background:linear-gradient(transparent, rgba(16,20,24,.55));
-  color:#F3F0E8; font-size:12px; letter-spacing:.12em; text-align:left;
+.g-photo::after{
+  content:""; position:absolute; inset:0; border-radius:6px;
+  border:1px solid rgba(255,255,255,.16); pointer-events:none;
 }
-.g-cap .yy{ display:block; font-size:10px; letter-spacing:.3em; opacity:.75; margin-bottom:2px; }
-.g-dots{ display:flex; justify-content:center; gap:7px; margin-top:4px; }
-.g-dots i{
-  width:5px; height:5px; border-radius:50%; background:var(--line);
-  transition:background .3s, transform .3s;
+.g-photo img{
+  width:100%; height:100%; display:block; object-fit:cover;
+  transition:transform .7s cubic-bezier(.2,.7,.2,1);
 }
-.g-dots i.on{ background:var(--seal); transform:scale(1.25); }
-.g-hint{ text-align:center; font-size:11px; letter-spacing:.2em; color:var(--text-faint); margin-top:12px; }
+.g-photo:hover img{ transform:scale(1.02); }
+.g-photo--1{ grid-column:1 / -1; width:88%; aspect-ratio:2/3; }
+.g-photo--2{
+  grid-column:1 / -1; justify-self:end; width:72%; aspect-ratio:4/3;
+  margin-top:-3.2rem; border:6px solid var(--bg); box-shadow:var(--shadow);
+}
+.g-photo--3, .g-photo--4{ width:100%; aspect-ratio:3/4; }
+.g-photo--3{ margin-top:2rem; }
+.g-photo--5{ grid-column:1 / -1; justify-self:end; width:88%; aspect-ratio:4/3; margin-top:.25rem; }
+.g-all{
+  display:flex; align-items:center; justify-content:space-between;
+  width:calc(100% - 56px); margin:22px 28px 0; min-height:52px; padding:0 18px;
+  border:1px solid var(--line); border-radius:6px; background:transparent;
+  color:var(--text); font-family:inherit; font-size:13px; letter-spacing:.1em;
+  cursor:pointer; transition:background .2s ease, border-color .2s ease;
+}
+.g-all:hover{ background:var(--card); border-color:var(--accent); }
+.g-all-count{ color:var(--accent); font-size:16px; letter-spacing:.14em; }
+@media (prefers-reduced-motion: reduce){
+  .g-photo img{ transition:none; }
+  .g-photo:hover img{ transform:none; }
+}
 
 /* lightbox */
 .lightbox{
@@ -487,6 +500,15 @@ main{ padding-bottom:20px; }
   display:flex; align-items:center; justify-content:center; font-size:22px;
   background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
 }
+.lightbox .lb-nav{
+  position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+  width:46px; height:46px; border-radius:50%; color:#EDE9DF;
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px; line-height:1; padding-bottom:3px;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
+}
+.lightbox .lb-prev{ left:16px; }
+.lightbox .lb-next{ right:16px; }
 
 /* ---------- location ---------- */
 .venue-card{
@@ -537,7 +559,6 @@ main{ padding-bottom:20px; }
 }
 
 /* ---------- gifts / accounts ---------- */
-.gift-note{ text-align:center; font-size:14px; color:var(--text-soft); margin-bottom:30px; }
 .acc{
   border:1px solid var(--line-soft); border-radius:14px; background:var(--card);
   box-shadow:var(--shadow-sm); overflow:hidden;
@@ -566,23 +587,73 @@ main{ padding-bottom:20px; }
 
 /* ---------- footer ---------- */
 footer{
-  margin-top:96px; padding:56px 28px calc(48px + env(safe-area-inset-bottom));
-  border-top:1px solid var(--line-soft); text-align:center;
+  position:relative; isolation:isolate; overflow:hidden;
+  min-height:42rem; margin-top:96px; padding:0;
+  display:flex; align-items:flex-end;
+  border-top:0; text-align:center; color:#fff; background:#101417;
+}
+.foot-media,
+.foot-media img,
+.foot-scrim{
+  position:absolute; inset:0; width:100%; height:100%;
+}
+.foot-media{ z-index:0; pointer-events:none; }
+.foot-media img{
+  display:block; object-fit:cover; object-position:44% center;
+  filter:saturate(.72) contrast(1.04);
+}
+.foot-scrim{
+  background:
+    linear-gradient(180deg, rgba(11,14,15,.04) 18%, rgba(11,14,15,.28) 56%, rgba(11,14,15,.94) 100%),
+    linear-gradient(90deg, rgba(11,14,15,.18), transparent 72%);
+}
+.foot-content{
+  position:relative; z-index:1; width:100%;
+  padding:5rem 28px calc(48px + env(safe-area-inset-bottom));
+  text-shadow:0 2px 22px rgba(0,0,0,.42);
+}
+.foot-eyebrow{
+  margin-bottom:22px; color:rgba(255,255,255,.76);
+  font-size:11px; font-style:italic; letter-spacing:.2em; text-indent:.2em;
 }
 .foot-moon{
-  width:34px; height:34px; border-radius:50%; margin:0 auto 22px;
-  background:radial-gradient(circle at 38% 32%, var(--moon-hi), var(--moon-lo) 82%);
-  box-shadow:0 8px 18px var(--moon-shadow);
+  width:32px; height:32px; border-radius:50%; margin:0 auto 22px;
+  background:radial-gradient(circle at 38% 32%, #fffdf7, #d8cfbf 82%);
+  box-shadow:0 10px 24px rgba(0,0,0,.38), 0 0 0 8px rgba(255,255,255,.05);
 }
-.foot-line{ font-size:13.5px; color:var(--text-soft); }
-.share-row{ display:flex; justify-content:center; gap:10px; margin-top:26px; }
+.foot-line{
+  font-family:AppleMyungjo,"Nanum Myeongjo","Noto Serif KR",Batang,serif;
+  font-size:13.5px; line-height:2.05; color:rgba(255,255,255,.9);
+}
+.foot-rule{
+  width:1px; height:38px; margin:25px auto 22px;
+  background:rgba(255,255,255,.5);
+}
+.share-row{
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px; width:100%; max-width:320px; margin:30px auto 0;
+}
+footer .pill{
+  width:100%; min-height:46px; padding:10px 14px;
+  color:#fff; border-color:rgba(255,255,255,.44);
+  background:rgba(10,13,14,.24);
+  -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px);
+  text-shadow:0 1px 10px rgba(0,0,0,.35);
+}
+footer .pill:active{ border-color:rgba(255,255,255,.76); background:rgba(10,13,14,.42); }
+footer .pill:focus-visible{ outline-color:#fff; }
 .foot-sign{
-  margin-top:38px; font-size:11px; letter-spacing:.34em;
-  color:var(--text-faint); text-transform:uppercase; line-height:2;
+  margin-top:0; font-size:11px; letter-spacing:.3em;
+  color:rgba(239,218,184,.88); text-transform:uppercase; line-height:1.9;
 }
 /* split into deliberate lines (name / date) so it never wraps awkwardly on mobile;
    text-indent compensates the trailing letter-spacing to keep each line centered */
 .foot-sign span{ display:block; text-indent:.34em; }
+.foot-sign span:first-child{
+  font-size:16px; letter-spacing:.16em; text-indent:.16em;
+  color:rgba(255,255,255,.96); text-transform:none;
+}
+.foot-sign span + span{ margin-top:3px; }
 
 /* ---------- toast ---------- */
 .toast{
@@ -601,10 +672,10 @@ footer{
   position:fixed; inset:0; z-index:200;
   display:flex; align-items:center; justify-content:center;
   padding:calc(34px + env(safe-area-inset-top)) 28px calc(34px + env(safe-area-inset-bottom));
-  background:var(--bg);
-  color:var(--text);
+  background:radial-gradient(circle at 50% 42%, rgba(14,18,26,.58) 0%, rgba(8,11,17,.72) 78%, rgba(6,8,13,.78) 100%);
+  color:#F6F1E7;
   width:100%; max-width:100%; overflow:hidden;
-  transition:opacity .7s ease, visibility .7s ease;
+  transition:opacity 1.15s ease, visibility 1.15s ease;
 }
 .intro::before{
   content:""; position:absolute; inset:0; pointer-events:none;
@@ -617,42 +688,26 @@ footer{
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   text-align:center;
 }
-.intro-eyebrow{
-  font-size:10px; letter-spacing:.42em; text-indent:.42em;
-  color:var(--seal); text-transform:uppercase;
+.intro-script{
+  font-family:"Snell Roundhand","Apple Chancery","Segoe Script","Bradley Hand","Brush Script MT",cursive;
+  font-size:clamp(40px, 13vw, 54px); font-weight:400; font-style:italic;
+  line-height:1.25; letter-spacing:.01em; color:#F7F2E8;
+  text-shadow:0 1px 3px rgba(0,0,0,.6), 0 2px 30px rgba(0,0,0,.5);
+  /* 붓글씨처럼 왼쪽 → 오른쪽으로 써지는 리빌 */
+  animation:introDraw 1.9s cubic-bezier(.35,.6,.2,1) .5s both;
 }
-.intro-moon{
-  position:relative; width:142px; height:142px; border-radius:50%;
-  margin:44px auto 40px;
-  background:radial-gradient(circle at 38% 32%, var(--moon-hi), var(--moon-lo) 82%);
-  box-shadow:0 24px 36px var(--moon-shadow);
+.intro-date2{
+  margin-top:26px; font-size:11px; letter-spacing:.32em; text-indent:.32em;
+  color:rgba(247,242,232,.62); text-transform:uppercase;
+  text-shadow:0 1px 6px rgba(0,0,0,.55);
+  animation:introRise .9s ease-out 2.05s both;
 }
-.intro-moon::after{
-  content:""; position:absolute; left:8%; right:8%; top:50%; height:1px;
-  background:linear-gradient(90deg, transparent, color-mix(in srgb, var(--text) 22%, transparent), transparent);
+@keyframes introDraw{
+  from{ opacity:0; clip-path:inset(-15% 100% -25% -5%); }
+  55%{ opacity:1; }
+  to{ opacity:1; clip-path:inset(-15% -5% -25% -5%); }
 }
-.intro-title{
-  font-size:24px; font-weight:300; letter-spacing:.18em; text-indent:.18em;
-  line-height:1.7; color:var(--text);
-}
-.intro-title .knot{ color:var(--seal); padding:0 .22em; }
-.intro-copy{
-  margin-top:22px; font-size:13.5px; line-height:2;
-  color:var(--text-soft); letter-spacing:.08em;
-}
-.intro-date{
-  margin-top:28px; font-size:12px; color:var(--text-faint);
-  letter-spacing:.12em;
-}
-.intro-enter{
-  margin-top:48px;
-  min-height:48px; padding:11px 32px; border-radius:999px;
-  border:1px solid var(--text); background:var(--text); color:var(--bg);
-  font-size:13px; letter-spacing:.16em; text-indent:.16em;
-  box-shadow:var(--shadow-sm);
-  transition:transform .12s, opacity .25s;
-}
-.intro-enter:active{ transform:scale(.97); }
+@keyframes introRise{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:none; } }
 
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce){
@@ -667,19 +722,10 @@ footer{
 </head>
 <body class="intro-open">
 
-<div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+<div class="intro" id="intro" aria-hidden="true">
   <div class="intro-inner">
-    <p class="intro-eyebrow latin">Invitation</p>
-    <div class="intro-moon" aria-hidden="true"></div>
-    <h1 class="intro-title" id="introTitle">
-      <span data-fill="groomName">강민구</span><span class="knot" aria-hidden="true">·</span><span data-fill="brideName">유미진</span>
-    </h1>
-    <p class="intro-copy">
-      두 사람이 하나의 달이 되는 날<br>
-      소중한 분들을 초대합니다
-    </p>
-    <p class="intro-date" data-fill="dateLine">2026년 10월 3일 토요일 낮 12시 10분</p>
-    <button class="intro-enter" id="introEnter" type="button">초대장 열기</button>
+    <p class="intro-script">Celebrate with us</p>
+    <p class="intro-date2 latin">Mingu &amp; Mijin &nbsp;·&nbsp; 2026. 10. 03</p>
   </div>
 </div>
 
@@ -867,12 +913,14 @@ footer{
     <!-- ======================= GALLERY ======================= -->
     <section class="sec gallery" id="gallery">
       <div class="sec-head reveal">
-        <p class="sec-eyebrow latin">Four Seasons</p>
-        <h2 class="sec-title">우리의 계절</h2>
+        <p class="sec-eyebrow latin">Our Moments</p>
+        <h2 class="sec-title">우리의 순간</h2>
       </div>
-      <div class="g-track reveal" id="gTrack" aria-label="두 사람의 사계절 갤러리" role="list"></div>
-      <div class="g-dots" id="gDots" aria-hidden="true"></div>
-      <p class="g-hint">옆으로 넘겨 보세요</p>
+      <div class="g-collage reveal" id="gCollage" aria-label="우리의 순간 사진 미리보기"></div>
+      <button class="g-all reveal" id="gAll" type="button" aria-haspopup="dialog">
+        <span>모든 사진 보기</span>
+        <span class="g-all-count latin" id="gAllCount" aria-hidden="true"></span>
+      </button>
     </section>
 
     <div class="divider" aria-hidden="true"></div>
@@ -883,10 +931,6 @@ footer{
         <p class="sec-eyebrow latin">With Love</p>
         <h2 class="sec-title">마음 전하실 곳</h2>
       </div>
-      <p class="gift-note reveal">
-        참석이 어려워 마음을 전하고 싶으신 분들을 위해<br>
-        계좌번호를 남깁니다. 너른 마음으로 헤아려 주세요.
-      </p>
       <div class="reveal">
         <details class="acc">
           <summary>신랑 측 <span class="chev" aria-hidden="true">▼</span></summary>
@@ -902,16 +946,24 @@ footer{
 
   <!-- ======================= FOOTER ======================= -->
   <footer>
-    <div class="foot-moon reveal" aria-hidden="true"></div>
-    <p class="foot-line reveal">
-      저희 두 사람의 이야기를 끝까지 읽어 주셔서 감사합니다.<br>
-      보름달처럼 가득 찬 마음으로 그날 뵙겠습니다.
-    </p>
-    <div class="share-row reveal">
-      <button class="pill" id="shareBtn">청첩장 공유하기</button>
-      <button class="pill" id="copyLinkBtn">링크 복사</button>
+    <div class="foot-media" aria-hidden="true">
+      <img id="closingPhoto" src="images/closing.jpg" alt="" loading="lazy" decoding="async" width="1397" height="932">
+      <div class="foot-scrim"></div>
     </div>
-    <p class="foot-sign latin reveal" id="footSign"><span>Mingu &amp; Mijin</span><span>October 3rd, 2026</span></p>
+    <div class="foot-content">
+      <p class="foot-eyebrow latin reveal">A lifetime, together</p>
+      <div class="foot-moon reveal" aria-hidden="true"></div>
+      <p class="foot-line reveal">
+        저희 두 사람의 이야기를 끝까지 읽어 주셔서 감사합니다.<br>
+        보름달처럼 가득 찬 마음으로 그날 뵙겠습니다.
+      </p>
+      <div class="foot-rule reveal" aria-hidden="true"></div>
+      <p class="foot-sign latin reveal" id="footSign"><span>Mingu &amp; Mijin</span><span>October 3rd, 2026</span></p>
+      <div class="share-row reveal">
+        <button class="pill" id="shareBtn">카카오 공유</button>
+        <button class="pill" id="copyLinkBtn">링크 복사</button>
+      </div>
+    </div>
   </footer>
 </div>
 
@@ -919,9 +971,11 @@ footer{
 <!-- lightbox -->
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="사진 크게 보기">
   <button class="lb-close" data-close aria-label="닫기">✕</button>
+  <button class="lb-nav lb-prev" id="lbPrev" type="button" aria-label="이전 사진">‹</button>
+  <button class="lb-nav lb-next" id="lbNext" type="button" aria-label="다음 사진">›</button>
   <figure>
     <img id="lbImg" alt="">
-    <figcaption id="lbCap"></figcaption>
+    <figcaption id="lbCap" class="latin"></figcaption>
   </figure>
 </div>
 
@@ -956,7 +1010,8 @@ const CONFIG = {
   mapTmapFallbackUrl: 'https://map.life/6e0491e2',
   venuePageUrl: 'https://www.partyumhouse.com/location/#request',
 
-
+  // 마지막 클로징 섹션 배경 사진
+  closingImage: 'images/closing.jpg',
   footSign: 'Mingu & Mijin — October 3rd, 2026',
 
   accounts: {
@@ -971,12 +1026,17 @@ const CONFIG = {
     ],
   },
 
-  // 사진이 준비되면 src에 경로를 넣으세요. 비워 두면 사계절 수묵 일러스트가 그려집니다.
+  // 우리의 순간 갤러리 — images/gallery/NN.jpg (번호 순서대로 표시)
   gallery: [
-    { src: '', season: 'spring', year: '2019', cap: '처음 만난 봄' },
-    { src: '', season: 'summer', year: '2022', cap: '함께 떠난 첫 바다' },
-    { src: '', season: 'winter', year: '2025', cap: '첫눈, 그리고 약속' },
-    { src: '', season: 'autumn', year: '2026', cap: '보름달이 뜨는 계절' },
+    { src: 'images/gallery/01.jpg', alt: '꽃으로 뒤덮인 아치 앞에서 부케를 든 신랑 신부' },
+    { src: 'images/gallery/02.jpg', alt: '해질녘 조명이 켜진 정원에서 마주 선 신랑 신부' },
+    { src: 'images/gallery/03.jpg', alt: '아치형 복도와 샹들리에 아래 나란히 선 신랑 신부' },
+    { src: 'images/gallery/04.jpg', alt: '네온 조명이 켜진 서재에서 선글라스를 끼고 장난스럽게 선 신랑 신부' },
+    { src: 'images/gallery/05.jpg', alt: '샹들리에가 있는 밝은 방에서 드레스를 펼치고 앉은 신부와 신랑' },
+    { src: 'images/gallery/06.jpg', alt: '기와지붕 한옥 창가에서 장난스러운 포즈를 취한 신랑 신부' },
+    { src: 'images/gallery/07.jpg', alt: '분수와 조각상이 있는 정원에서 분홍빛 드레스를 입은 신부와 신랑' },
+    { src: 'images/gallery/08.jpg', alt: '폴라로이드 사진으로 꾸민 벽 앞 소파에 앉은 신랑 신부' },
+    { src: 'images/gallery/09.jpg', alt: '밤 서울 도심 스카이라인을 배경으로 루프톱에 선 신부' },
   ],
 };
 
@@ -1021,22 +1081,66 @@ $$('[data-fill]').forEach(el => {
   if (CONFIG[key] != null) el.textContent = CONFIG[key];
 });
 
+/* closing background photo — keep the bundled image as a safe fallback */
+(function closingPhoto(){
+  const img = $('#closingPhoto');
+  if (!img) return;
+  const fallback = img.getAttribute('src');
+  img.addEventListener('error', () => {
+    if (img.getAttribute('src') !== fallback) img.src = fallback;
+  });
+  if (CONFIG.closingImage) img.src = CONFIG.closingImage;
+})();
+
 /* ---------- opening intro ---------- */
 (function intro(){
   const intro = $('#intro');
-  const btn = $('#introEnter');
-  if (!intro || !btn) return;
+  if (!intro) return;
 
-  function enter(){
+  let revealed = false;
+  function reveal(){
+    if (revealed) return; revealed = true;
+    document.body.classList.add('is-loaded');   // 딤이 걷히며 히어로(달항아리)가 피어남
     intro.classList.add('hide');
     document.body.classList.remove('intro-open');
-    setTimeout(() => intro.remove(), REDUCED ? 0 : 750);
+    confettiBurst();                            // 컨페티(꽃잎) 한 차례 흩날림
+    setTimeout(() => intro.remove(), REDUCED ? 0 : 1200);
   }
-  btn.addEventListener('click', enter);
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') enter();
-  }, { once: true });
+  // 자동 연출: 딤 위에 필기체 문구가 써진 뒤(약 3초) 딤이 걷히며 본문이 피어남. 탭하면 건너뜀.
+  const timer = setTimeout(reveal, REDUCED ? 0 : 3000);
+  intro.addEventListener('click', () => { clearTimeout(timer); reveal(); });
+  document.addEventListener('keydown', function onKey(e){
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape'){
+      document.removeEventListener('keydown', onKey);
+      clearTimeout(timer); reveal();
+    }
+  });
 })();
+
+/* 인트로가 걷힐 때 꽃잎 컨페티를 한 차례 흩뿌린다(기존 .petal 모션 재사용). */
+function confettiBurst(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const layer = document.createElement('div');
+  layer.className = 'petals--burst';
+  layer.setAttribute('aria-hidden', 'true');
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < 16; i++){
+    const p = document.createElement('i');
+    p.className = 'petal';
+    p.style.cssText =
+      `--x:${rnd(4, 94).toFixed(1)}%;` +
+      `--s:${rnd(6, 12).toFixed(1)}px;` +
+      `--dur:${rnd(4.5, 7.5).toFixed(1)}s;` +
+      `--delay:${rnd(0, .7).toFixed(2)}s;` +
+      `--sway:${rnd(-26, 26).toFixed(0)}px;` +
+      `--op:${rnd(0.30, 0.60).toFixed(2)};`;
+    frag.appendChild(p);
+  }
+  layer.appendChild(frag);
+  (document.querySelector('.app') || document.body).appendChild(layer);
+  setTimeout(() => layer.remove(), 8500);
+}
 
 /* the wedding date, parsed as KST wall-clock digits (immune to the viewer's timezone) */
 const [W_Y, W_M, W_D] = CONFIG.weddingISO.slice(0, 10).split('-').map(Number);
@@ -1084,9 +1188,11 @@ $('#mapTmap').addEventListener('click', e => {
   }, 900);
 });
 
-/* ---------- hero load sequence ---------- */
+/* ---------- hero load sequence ----------
+   인트로 시퀀스가 딤을 걷으며 is-loaded를 직접 붙임(스크립트 시점 타이머라 load에 무관).
+   아래는 인트로가 어떤 이유로든 화면을 열지 못했을 때를 위한 안전장치. */
 window.addEventListener('load', () => {
-  setTimeout(() => document.body.classList.add('is-loaded'), REDUCED ? 0 : 250);
+  setTimeout(() => document.body.classList.add('is-loaded'), REDUCED ? 0 : 4200);
 });
 
 /* ---------- keep mobile swipes from nudging the whole page sideways ---------- */
@@ -1102,7 +1208,7 @@ window.addEventListener('load', () => {
   }, { passive:true });
 
   document.addEventListener('touchmove', e => {
-    if (e.touches.length !== 1 || e.target.closest('.g-track')) return;
+    if (e.touches.length !== 1) return;
     const t = e.touches[0];
     const dx = t.clientX - startX;
     const dy = t.clientY - startY;
@@ -1209,164 +1315,68 @@ window.addEventListener('load', () => {
   }
 })();
 
-/* ---------- gallery: seasonal ink-wash placeholders ---------- */
-const SEASONS = {
-  spring: { top:[247,242,236], mid:[214,199,186], low:[176,158,150], moon:.22, kr:'봄' },
-  summer: { top:[226,232,226], mid:[152,175,168], low:[ 70,100,110], moon:.5,  kr:'여름' },
-  autumn: { top:[243,235,220], mid:[205,176,138], low:[120, 98, 80], moon:1,   kr:'가을' },
-  winter: { top:[228,232,238], mid:[168,180,196], low:[ 62, 78, 98], moon:.78, kr:'겨울' },
-};
-function mulberry(seed){
-  return function(){
-    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
-    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  };
-}
-function paintSeason(cv, seasonKey, seed){
-  const s = SEASONS[seasonKey] || SEASONS.autumn;
-  const rnd = mulberry(seed);
-  const w = cv.width, h = cv.height, ctx = cv.getContext('2d');
-  const rgb = a => `rgb(${a[0]},${a[1]},${a[2]})`;
-  const rgba = (a, al) => `rgba(${a[0]},${a[1]},${a[2]},${al})`;
-
-  /* sky wash */
-  const sky = ctx.createLinearGradient(0, 0, 0, h);
-  sky.addColorStop(0, rgb(s.top));
-  sky.addColorStop(.62, rgb(s.mid));
-  sky.addColorStop(1, rgb(s.low));
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, w, h);
-
-  /* distant mountain washes */
-  for (let i = 0; i < 3; i++){
-    const base = h * (.58 + i * .13);
-    ctx.beginPath();
-    ctx.moveTo(0, h);
-    ctx.lineTo(0, base + rnd() * 30);
-    let x = 0;
-    while (x < w){
-      const nx = x + 60 + rnd() * 90;
-      const ny = base - 20 - rnd() * (70 - i * 18);
-      ctx.quadraticCurveTo((x + nx) / 2, ny, nx, base + rnd() * 24);
-      x = nx;
-    }
-    ctx.lineTo(w, h);
-    ctx.closePath();
-    ctx.fillStyle = rgba(s.low, .16 + i * .16);
-    ctx.fill();
-  }
-
-  /* the moon — phase varies with the season of our story */
-  const mx = w * (.3 + rnd() * .4), my = h * (.2 + rnd() * .1), mr = w * .1;
-  ctx.save();
-  ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2); ctx.clip();
-  ctx.fillStyle = 'rgba(252,249,240,.96)';
-  ctx.fillRect(mx - mr, my - mr, mr * 2, mr * 2);
-  if (s.moon < 1){
-    ctx.fillStyle = rgba(s.mid, .92);
-    ctx.beginPath();
-    ctx.arc(mx - mr * 2 * (1 - s.moon), my, mr * 1.04, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.restore();
-  ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(252,249,240,.35)'; ctx.lineWidth = 1; ctx.stroke();
-
-  /* season particles: petals / rain / leaves / snow */
-  ctx.fillStyle = 'rgba(252,250,244,.5)';
-  for (let i = 0; i < 46; i++){
-    const x = rnd() * w, yy = rnd() * h, r = .8 + rnd() * 2.2;
-    if (seasonKey === 'summer'){
-      ctx.strokeStyle = 'rgba(240,245,244,.25)'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(x, yy); ctx.lineTo(x - 3, yy + 14 + rnd() * 10); ctx.stroke();
-    } else {
-      ctx.globalAlpha = .2 + rnd() * .5;
-      ctx.beginPath();
-      ctx.ellipse(x, yy, r, r * (seasonKey === 'winter' ? 1 : .6), rnd() * Math.PI, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-  }
-
-}
-/* paper grain, drawn as translucent dots so it layers over the wash */
-function paintGrain(cv){
-  const ctx = cv.getContext('2d');
-  const rnd = mulberry(7);
-  ctx.globalAlpha = .05;
-  ctx.fillStyle = '#000';
-  for (let i = 0; i < 900; i++){
-    ctx.fillRect(rnd() * cv.width, rnd() * cv.height, 1, 1);
-  }
-  ctx.globalAlpha = 1;
-}
-
+/* ---------- gallery: 우리의 순간 (editorial collage) ---------- */
 (function gallery(){
-  const track = $('#gTrack'), dots = $('#gDots');
-  CONFIG.gallery.forEach((g, i) => {
-    const item = document.createElement('div');
-    item.className = 'g-item';
-    item.setAttribute('role', 'listitem');
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'g-card';
-    card.setAttribute('aria-label', `${g.year}년 ${g.cap} — 크게 보기`);
-    if (g.src){
-      const img = document.createElement('img');
-      img.src = g.src; img.alt = g.cap; img.loading = 'lazy';
-      card.appendChild(img);
-    } else {
-      const cv = document.createElement('canvas');
-      cv.width = 640; cv.height = 800;
-      paintSeason(cv, g.season, 20260 + i * 97);
-      paintGrain(cv);
-      card.appendChild(cv);
-    }
-    const cap = document.createElement('span');
-    cap.className = 'g-cap';
-    const s = SEASONS[g.season];
-    cap.innerHTML = `<span class="yy latin">${g.year}${s ? ' · ' + s.kr : ''}</span>${g.cap}`;
-    card.appendChild(cap);
-    card.addEventListener('click', () => openLightbox(card, g));
-    item.appendChild(card);
-    track.appendChild(item);
+  const collage = $('#gCollage');
+  const all = $('#gAll');
+  const imgs = CONFIG.gallery;
+  if (!collage || !imgs.length) return;
 
-    const dot = document.createElement('i');
-    if (i === 0) dot.className = 'on';
-    dots.appendChild(dot);
+  // 콜라주는 앞에서부터 번호 순서대로 5장을 미리보기로 노출.
+  // (01~05가 슬롯 가로/세로 구도에 맞게 번호 매겨져 있음: 세로·가로·세로·세로·가로)
+  const preview = imgs.map((_, i) => i).slice(0, 5);
+
+  preview.forEach((imgIndex, slot) => {
+    const g = imgs[imgIndex];
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `g-photo g-photo--${slot + 1}`;
+    btn.setAttribute('aria-haspopup', 'dialog');
+    btn.setAttribute('aria-label', `전체 ${imgs.length}장 중 ${imgIndex + 1}번째 사진 크게 보기`);
+    const img = document.createElement('img');
+    img.src = g.src; img.alt = g.alt;
+    img.loading = 'lazy'; img.decoding = 'async';
+    img.width = 900; img.height = 1200;
+    btn.appendChild(img);
+    btn.addEventListener('click', () => openLightbox(imgIndex));
+    collage.appendChild(btn);
   });
 
-  /* dot state on scroll */
-  let ticking = false;
-  track.addEventListener('scroll', () => {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => {
-      const cards = $$('.g-item', track);
-      const center = track.scrollLeft + track.clientWidth / 2;
-      let best = 0, bestDist = Infinity;
-      cards.forEach((c, i) => {
-        const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - center);
-        if (d < bestDist){ bestDist = d; best = i; }
-      });
-      $$('#gDots i').forEach((d, i) => d.classList.toggle('on', i === best));
-      ticking = false;
-    });
-  }, { passive: true });
+  if (all){
+    const count = $('#gAllCount');
+    if (count) count.textContent = imgs.length;
+    all.setAttribute('aria-label', `전체 ${imgs.length}장의 사진 보기`);
+    all.addEventListener('click', () => openLightbox(0));
+  }
 })();
 
-/* ---------- lightbox ---------- */
+/* ---------- lightbox (우리의 순간 — browse all photos) ---------- */
 const lb = $('#lightbox');
 const appRoot = $('#app');
+const lbImg = $('#lbImg');
+const lbCap = $('#lbCap');
+const lbImages = CONFIG.gallery;
 let lbLastFocus = null;
-function openLightbox(card, g){
-  const img = $('#lbImg');
-  const media = card.querySelector('img, canvas');
-  img.src = media.tagName === 'IMG' ? media.src : media.toDataURL('image/png');
-  img.alt = g.cap;
-  $('#lbCap').textContent = `${g.year} — ${g.cap}`;
+let lbIndex = 0;
+const wrap = i => (i % lbImages.length + lbImages.length) % lbImages.length;
+function preload(i){ const g = lbImages[wrap(i)]; if (g){ const p = new Image(); p.src = g.src; } }
+function renderLb(){
+  const g = lbImages[lbIndex];
+  if (!g) return;
+  lbImg.src = g.src;
+  lbImg.alt = g.alt;
+  lbCap.textContent = `${lbIndex + 1} / ${lbImages.length}`;
+  preload(lbIndex + 1); preload(lbIndex - 1);
+}
+function stepLb(dir){
+  if (!lbImages.length) return;
+  lbIndex = wrap(lbIndex + dir);
+  renderLb();
+}
+function openLightbox(index){
+  if (!lbImages.length) return;
+  lbIndex = wrap(index | 0);
+  renderLb();
   lbLastFocus = document.activeElement;
   lb.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1379,7 +1389,18 @@ function closeLightbox(){
   appRoot.inert = false;
   lbLastFocus?.focus?.({ preventScroll: true });
 }
+$('#lbPrev')?.addEventListener('click', () => stepLb(-1));
+$('#lbNext')?.addEventListener('click', () => stepLb(1));
 lb.addEventListener('click', e => { if (e.target === lb || e.target.closest('[data-close]')) closeLightbox(); });
+/* swipe to browse */
+let lbTouchX = null;
+lb.addEventListener('touchstart', e => { lbTouchX = e.changedTouches[0].clientX; }, { passive: true });
+lb.addEventListener('touchend', e => {
+  if (lbTouchX === null) return;
+  const dx = e.changedTouches[0].clientX - lbTouchX;
+  if (Math.abs(dx) > 44) stepLb(dx < 0 ? 1 : -1);
+  lbTouchX = null;
+}, { passive: true });
 
 /* ---------- accounts ---------- */
 (function accounts(){
@@ -1409,9 +1430,12 @@ $$('.copy-mini[data-copy]').forEach(b => {
   b.addEventListener('click', () => copyText(b.dataset.copy, b.dataset.copyLabel || '내용'));
 });
 
-/* ---------- close the lightbox on Escape ---------- */
+/* ---------- lightbox keyboard: Escape to close, arrows to browse ---------- */
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && lb.classList.contains('open')) closeLightbox();
+  if (!lb.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  else if (e.key === 'ArrowLeft') stepLb(-1);
+  else if (e.key === 'ArrowRight') stepLb(1);
 });
 
 /* ---------- share ---------- */
