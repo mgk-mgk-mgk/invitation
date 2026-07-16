@@ -10,6 +10,7 @@
 <link rel="preload" href="fonts/allura-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/cormorant-garamond-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="images/couple-eating-sprite.webp" as="image" type="image/webp">
+<link rel="preload" href="images/groom-eating-sprite.webp" as="image" type="image/webp">
 <style>
 @font-face{
   font-family:"Invitation Script";
@@ -301,13 +302,32 @@ a{ color:var(--accent); text-decoration:none; }
 }
 .feast-couple{
   position:absolute; z-index:2; left:-5%; top:5%; width:110%; height:55%;
-  background:url("images/couple-eating-sprite.webp") center 0 / auto 1200% no-repeat;
   pointer-events:none;
+}
+.feast-couple::before,
+.feast-couple::after{
+  content:""; position:absolute; inset:0;
+  background-position:center 0;
+  background-size:auto 1200%;
+  background-repeat:no-repeat;
+}
+/* The bride keeps the original frames. The groom uses a separate redrawn
+   sprite whose head and torso stay fixed while only his eating arm moves. */
+.feast-couple::before{
+  background-image:url("images/couple-eating-sprite.webp");
+  clip-path:inset(0 0 0 48%);
+}
+.feast-couple::after{
+  background-image:url("images/groom-eating-sprite.webp");
+  clip-path:inset(0 52% 0 0);
 }
 /* The first bite is frame 4 and the second is frame 10. A 423ms lead-in
    aligns them with the rice timers at 1.29s and 2.59s. Three loops make the
    six scheduled bites, then the characters rest until the jar closes. */
-.moon.is-feast .feast-couple{
+.moon.is-feast .feast-couple::before{
+  animation:feastCoupleSprite var(--eat-cycle) step-end .423s 3 both;
+}
+.moon.is-feast .feast-couple::after{
   animation:feastCoupleSprite var(--eat-cycle) step-end .423s 3 both;
 }
 @keyframes feastCoupleSprite{
@@ -324,7 +344,6 @@ a{ color:var(--accent); text-decoration:none; }
   83.333333%{ background-position:center 90.909091%; }
   91.666667%,100%{ background-position:center 100%; }
 }
-
 /* staged text reveals */
 .hero .stage{
   opacity:0; transform:translateY(10px);
@@ -573,10 +592,22 @@ main{ padding-bottom:20px; }
   overflow:hidden; overscroll-behavior:none; touch-action:pinch-zoom;
 }
 .lightbox.open{ display:flex; }
-.lightbox figure{ max-width:440px; width:100%; }
-.lightbox img{
-  display:block; max-width:100%; width:auto; margin-inline:auto;
-  max-height:68vh; max-height:68svh;
+.lightbox figure{ width:calc(100vw - 44px); max-width:930px; }
+.lb-viewport{ width:100%; overflow:hidden; }
+.lb-track{
+  display:flex; transform:translateX(-100%); will-change:transform;
+  transition:transform .42s cubic-bezier(.22,.75,.24,1);
+}
+.lb-track.is-prev{ transform:translateX(0); }
+.lb-track.is-next{ transform:translateX(-200%); }
+.lb-track.is-reset{ transition:none; }
+.lb-slide{
+  flex:0 0 100%; display:flex; align-items:center; justify-content:center;
+  height:min(68vh, calc(66.5vw - 29.26px), 620px);
+  height:min(68svh, calc(66.5vw - 29.26px), 620px);
+}
+.lb-slide img{
+  display:block; width:auto; max-width:none; height:100%;
   border-radius:10px; box-shadow:var(--shadow);
 }
 .lightbox figcaption{
@@ -597,6 +628,9 @@ main{ padding-bottom:20px; }
 }
 .lightbox .lb-prev{ left:16px; }
 .lightbox .lb-next{ right:16px; }
+@media (prefers-reduced-motion: reduce){
+  .lb-track{ transition:none; }
+}
 
 /* ---------- location ---------- */
 .venue-card{
@@ -1138,7 +1172,13 @@ footer .pill:focus-visible{ outline-color:#fff; }
   <button class="lb-nav lb-prev" id="lbPrev" type="button" aria-label="이전 사진">‹</button>
   <button class="lb-nav lb-next" id="lbNext" type="button" aria-label="다음 사진">›</button>
   <figure>
-    <img id="lbImg" alt="">
+    <div class="lb-viewport">
+      <div class="lb-track" id="lbTrack">
+        <div class="lb-slide" aria-hidden="true"><img id="lbPrevImg" alt=""></div>
+        <div class="lb-slide"><img id="lbImg" alt=""></div>
+        <div class="lb-slide" aria-hidden="true"><img id="lbNextImg" alt=""></div>
+      </div>
+    </div>
     <figcaption id="lbCap" class="latin"></figcaption>
   </figure>
 </div>
@@ -1182,13 +1222,13 @@ const CONFIG = {
 
   accounts: {
     groom: [
-      { name: '강민구', bank: '국민은행', no: '123456-04-567890' },
+      { name: '강민구', bank: '우리은행', no: '1002-837-686156' },
       { name: '강남석', bank: '우리은행', no: '1002-345-678901' },
       { name: '박선옥', bank: '하나은행', no: '620-123456-789' },
     ],
     bride: [
-      { name: '유미진', bank: '신한은행', no: '110-345-678901' },
-      { name: '김점자', bank: '카카오뱅크', no: '3333-01-2345678' },
+      { name: '유미진', bank: '신한은행', no: '110-201-536112' },
+      { name: '김점자', bank: '광주은행', no: '079-122-391586' },
     ],
   },
 
@@ -1789,30 +1829,65 @@ window.addEventListener('load', () => {
 /* ---------- lightbox (우리의 순간 — browse all photos) ---------- */
 const lb = $('#lightbox');
 const appRoot = $('#app');
+const lbTrack = $('#lbTrack');
+const lbPrevImg = $('#lbPrevImg');
 const lbImg = $('#lbImg');
+const lbNextImg = $('#lbNextImg');
 const lbCap = $('#lbCap');
 const lbImages = CONFIG.gallery;
 let lbLastFocus = null;
 let lbIndex = 0;
+let lbSliding = false;
+let lbSlideDir = 0;
 const wrap = i => (i % lbImages.length + lbImages.length) % lbImages.length;
 function preload(i){ const g = lbImages[wrap(i)]; if (g){ const p = new Image(); p.src = g.src; } }
+function setLbImage(img, index, announce = false){
+  const g = lbImages[wrap(index)];
+  if (!img || !g) return;
+  img.src = g.src;
+  img.alt = announce ? g.alt : '';
+}
 function renderLb(){
   const g = lbImages[lbIndex];
   if (!g) return;
-  lbImg.src = g.src;
-  lbImg.alt = g.alt;
+  setLbImage(lbPrevImg, lbIndex - 1);
+  setLbImage(lbImg, lbIndex, true);
+  setLbImage(lbNextImg, lbIndex + 1);
   lbCap.textContent = `${lbIndex + 1} / ${lbImages.length}`;
   preload(lbIndex + 1); preload(lbIndex - 1);
 }
 function stepLb(dir){
-  if (!lbImages.length) return;
-  lbIndex = wrap(lbIndex + dir);
-  renderLb();
+  if (!lbImages.length || lbSliding) return;
+  const nextDir = dir < 0 ? -1 : 1;
+  if (REDUCED){
+    lbIndex = wrap(lbIndex + nextDir);
+    renderLb();
+    return;
+  }
+  lbSliding = true;
+  lbSlideDir = nextDir;
+  lbTrack.classList.add(nextDir > 0 ? 'is-next' : 'is-prev');
 }
+lbTrack?.addEventListener('transitionend', e => {
+  if (!lbSliding || e.target !== lbTrack || e.propertyName !== 'transform') return;
+  lbIndex = wrap(lbIndex + lbSlideDir);
+  lbTrack.classList.add('is-reset');
+  lbTrack.classList.remove('is-prev', 'is-next');
+  renderLb();
+  void lbTrack.offsetWidth;
+  requestAnimationFrame(() => lbTrack.classList.remove('is-reset'));
+  lbSliding = false;
+  lbSlideDir = 0;
+});
 function openLightbox(index){
   if (!lbImages.length) return;
   lbIndex = wrap(index | 0);
+  lbSliding = false;
+  lbSlideDir = 0;
+  lbTrack.classList.add('is-reset');
+  lbTrack.classList.remove('is-prev', 'is-next');
   renderLb();
+  requestAnimationFrame(() => lbTrack.classList.remove('is-reset'));
   lbLastFocus = document.activeElement;
   lb.classList.add('open');
   lockPageScroll();
