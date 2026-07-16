@@ -592,22 +592,10 @@ main{ padding-bottom:20px; }
   overflow:hidden; overscroll-behavior:none; touch-action:pinch-zoom;
 }
 .lightbox.open{ display:flex; }
-.lightbox figure{ width:calc(100vw - 44px); max-width:930px; }
-.lb-viewport{ width:100%; overflow:hidden; }
-.lb-track{
-  display:flex; transform:translateX(-100%); will-change:transform;
-  transition:transform .42s cubic-bezier(.22,.75,.24,1);
-}
-.lb-track.is-prev{ transform:translateX(0); }
-.lb-track.is-next{ transform:translateX(-200%); }
-.lb-track.is-reset{ transition:none; }
-.lb-slide{
-  flex:0 0 100%; display:flex; align-items:center; justify-content:center;
-  height:min(68vh, calc(66.5vw - 29.26px), 620px);
-  height:min(68svh, calc(66.5vw - 29.26px), 620px);
-}
-.lb-slide img{
-  display:block; width:auto; max-width:none; height:100%;
+.lightbox figure{ max-width:440px; width:100%; }
+.lightbox img{
+  display:block; max-width:100%; width:auto; margin-inline:auto;
+  max-height:68vh; max-height:68svh;
   border-radius:10px; box-shadow:var(--shadow);
 }
 .lightbox figcaption{
@@ -628,9 +616,6 @@ main{ padding-bottom:20px; }
 }
 .lightbox .lb-prev{ left:16px; }
 .lightbox .lb-next{ right:16px; }
-@media (prefers-reduced-motion: reduce){
-  .lb-track{ transition:none; }
-}
 
 /* ---------- location ---------- */
 .venue-card{
@@ -1172,13 +1157,7 @@ footer .pill:focus-visible{ outline-color:#fff; }
   <button class="lb-nav lb-prev" id="lbPrev" type="button" aria-label="이전 사진">‹</button>
   <button class="lb-nav lb-next" id="lbNext" type="button" aria-label="다음 사진">›</button>
   <figure>
-    <div class="lb-viewport">
-      <div class="lb-track" id="lbTrack">
-        <div class="lb-slide" aria-hidden="true"><img id="lbPrevImg" alt=""></div>
-        <div class="lb-slide"><img id="lbImg" alt=""></div>
-        <div class="lb-slide" aria-hidden="true"><img id="lbNextImg" alt=""></div>
-      </div>
-    </div>
+    <img id="lbImg" alt="">
     <figcaption id="lbCap" class="latin"></figcaption>
   </figure>
 </div>
@@ -1829,65 +1808,30 @@ window.addEventListener('load', () => {
 /* ---------- lightbox (우리의 순간 — browse all photos) ---------- */
 const lb = $('#lightbox');
 const appRoot = $('#app');
-const lbTrack = $('#lbTrack');
-const lbPrevImg = $('#lbPrevImg');
 const lbImg = $('#lbImg');
-const lbNextImg = $('#lbNextImg');
 const lbCap = $('#lbCap');
 const lbImages = CONFIG.gallery;
 let lbLastFocus = null;
 let lbIndex = 0;
-let lbSliding = false;
-let lbSlideDir = 0;
 const wrap = i => (i % lbImages.length + lbImages.length) % lbImages.length;
 function preload(i){ const g = lbImages[wrap(i)]; if (g){ const p = new Image(); p.src = g.src; } }
-function setLbImage(img, index, announce = false){
-  const g = lbImages[wrap(index)];
-  if (!img || !g) return;
-  img.src = g.src;
-  img.alt = announce ? g.alt : '';
-}
 function renderLb(){
   const g = lbImages[lbIndex];
   if (!g) return;
-  setLbImage(lbPrevImg, lbIndex - 1);
-  setLbImage(lbImg, lbIndex, true);
-  setLbImage(lbNextImg, lbIndex + 1);
+  lbImg.src = g.src;
+  lbImg.alt = g.alt;
   lbCap.textContent = `${lbIndex + 1} / ${lbImages.length}`;
   preload(lbIndex + 1); preload(lbIndex - 1);
 }
 function stepLb(dir){
-  if (!lbImages.length || lbSliding) return;
-  const nextDir = dir < 0 ? -1 : 1;
-  if (REDUCED){
-    lbIndex = wrap(lbIndex + nextDir);
-    renderLb();
-    return;
-  }
-  lbSliding = true;
-  lbSlideDir = nextDir;
-  lbTrack.classList.add(nextDir > 0 ? 'is-next' : 'is-prev');
-}
-lbTrack?.addEventListener('transitionend', e => {
-  if (!lbSliding || e.target !== lbTrack || e.propertyName !== 'transform') return;
-  lbIndex = wrap(lbIndex + lbSlideDir);
-  lbTrack.classList.add('is-reset');
-  lbTrack.classList.remove('is-prev', 'is-next');
+  if (!lbImages.length) return;
+  lbIndex = wrap(lbIndex + dir);
   renderLb();
-  void lbTrack.offsetWidth;
-  requestAnimationFrame(() => lbTrack.classList.remove('is-reset'));
-  lbSliding = false;
-  lbSlideDir = 0;
-});
+}
 function openLightbox(index){
   if (!lbImages.length) return;
   lbIndex = wrap(index | 0);
-  lbSliding = false;
-  lbSlideDir = 0;
-  lbTrack.classList.add('is-reset');
-  lbTrack.classList.remove('is-prev', 'is-next');
   renderLb();
-  requestAnimationFrame(() => lbTrack.classList.remove('is-reset'));
   lbLastFocus = document.activeElement;
   lb.classList.add('open');
   lockPageScroll();
