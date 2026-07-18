@@ -1199,11 +1199,14 @@ const CONFIG = {
   closingImage: 'images/closing.jpg',
   footSign: 'Mingu & Mijin — October 3rd, 2026',
 
+  // 배경 음악
+  bgmSrc: 'audios/Before spring ends.mp3',
+
   accounts: {
     groom: [
       { name: '강민구', bank: '우리은행', no: '1002-837-686156' },
-      { name: '강남석', bank: '우리은행', no: '1002-345-678901' },
-      { name: '박선옥', bank: '하나은행', no: '620-123456-789' },
+      { name: '강남석', bank: '농협', no: '116-12-005136' },
+      { name: '박선옥', bank: '농협', no: '352-0813-1980-93' },
     ],
     bride: [
       { name: '유미진', bank: '신한은행', no: '110-201-536112' },
@@ -1940,105 +1943,41 @@ $('#shareBtn').addEventListener('click', async () => {
 });
 $('#copyLinkBtn').addEventListener('click', () => copyText(location.href, '청첩장 링크'));
 
-/* ---------- music box (Canon in D, WebAudio) ---------- */
-(function musicbox(){
+/* ---------- background music ---------- */
+(function backgroundMusic(){
   const btn = $('#bgmBtn');
-  let ctx = null, master = null, timer = null, nextTime = 0, step = 0, playing = false;
-
-  /* Canon in D — music-box register. [midi root, third offset] per chord:
-     D A Bm F#m G D G A — minor chords (Bm, F#m) take a minor third (15) */
-  const CHORDS = [[74,16],[69,16],[71,15],[66,15],[67,16],[62,16],[67,16],[69,16]];
-  const ARP_LEN = 4;                       /* root, 5th, 10th, octave */
-  const STEP_DUR = 0.32;                   /* dreamy eighth notes */
-  const f = midi => 440 * Math.pow(2, (midi - 69) / 12);
-
-  function makeReverb(ac){
-    const len = ac.sampleRate * 1.9;
-    const buf = ac.createBuffer(2, len, ac.sampleRate);
-    for (let ch = 0; ch < 2; ch++){
-      const d = buf.getChannelData(ch);
-      for (let i = 0; i < len; i++){
-        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6);
-      }
-    }
-    const cv = ac.createConvolver();
-    cv.buffer = buf;
-    return cv;
-  }
-  function setup(){
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain();
-    master.gain.value = .55;
-    const lp = ctx.createBiquadFilter();
-    lp.type = 'lowpass'; lp.frequency.value = 4200;
-    const reverb = makeReverb(ctx);
-    const wet = ctx.createGain(); wet.gain.value = .5;
-    const dry = ctx.createGain(); dry.gain.value = .75;
-    master.connect(lp);
-    lp.connect(dry); dry.connect(ctx.destination);
-    lp.connect(reverb); reverb.connect(wet); wet.connect(ctx.destination);
-  }
-  function bell(midi, t, vel){
-    const freq = f(midi);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(vel, t + .008);
-    g.gain.exponentialRampToValueAtTime(.0001, t + 1.9);
-    const o1 = ctx.createOscillator();
-    o1.type = 'sine'; o1.frequency.value = freq;
-    const o2 = ctx.createOscillator();
-    o2.type = 'sine'; o2.frequency.value = freq * 3.98;
-    const g2 = ctx.createGain();
-    g2.gain.setValueAtTime(vel * .18, t);
-    g2.gain.exponentialRampToValueAtTime(.0001, t + .4);
-    o1.connect(g); o2.connect(g2); g2.connect(g);
-    g.connect(master);
-    o1.start(t); o2.start(t);
-    o1.stop(t + 2); o2.stop(t + .6);
-  }
-  function schedule(){
-    while (nextTime < ctx.currentTime + .6){
-      const [root, third] = CHORDS[Math.floor(step / ARP_LEN) % CHORDS.length];
-      const offs = [0, 7, third, 12];
-      const note = root + 12 + offs[step % ARP_LEN];
-      bell(note, nextTime, .16 + (step % ARP_LEN === 0 ? .05 : 0));
-      if (step % ARP_LEN === 0) bell(root - 12, nextTime, .07);  /* soft low root */
-      nextTime += STEP_DUR;
-      step++;
-    }
-  }
+  const audio = new Audio(CONFIG.bgmSrc);
+  audio.preload = 'metadata';
+  audio.loop = true;
+  audio.volume = .55;
+  let playing = false;
   let starting = false;
+
+  function setPlaying(value){
+    playing = value;
+    btn.classList.toggle('playing', value);
+    btn.setAttribute('aria-pressed', String(value));
+    btn.setAttribute('aria-label', value ? '배경 음악 일시 정지' : '배경 음악 재생');
+  }
+
   async function start(){
     if (starting) return;
     starting = true;
     try{
-      clearInterval(timer);
-      if (!ctx) setup();
-      /* flip UI state synchronously so a second tap reads the truth */
-      playing = true;
-      btn.classList.add('playing');
-      btn.setAttribute('aria-pressed', 'true');
-      btn.setAttribute('aria-label', '배경 음악 일시 정지');
-      try{ await ctx.resume(); }catch(e){ /* context refused; leave silent */ }
-      if (!playing) return;             /* stopped while resume was in flight */
-      /* never rewind past notes already queued before a suspend */
-      nextTime = Math.max(ctx.currentTime + .1, nextTime);
-      schedule();
-      timer = setInterval(schedule, 180);
+      await audio.play();
+      setPlaying(true);
     }catch(e){
-      /* WebAudio unavailable — leave the button retryable and quiet */
+      setPlaying(false);
     }finally{
       starting = false;
     }
   }
+
   function stop(){
-    clearInterval(timer);
-    ctx?.suspend();
-    playing = false;
-    btn.classList.remove('playing');
-    btn.setAttribute('aria-pressed', 'false');
-    btn.setAttribute('aria-label', '배경 음악 재생');
+    audio.pause();
+    setPlaying(false);
   }
+
   btn.addEventListener('click', () => playing ? stop() : start());
   document.addEventListener('visibilitychange', () => { if (document.hidden && playing) stop(); });
 })();
